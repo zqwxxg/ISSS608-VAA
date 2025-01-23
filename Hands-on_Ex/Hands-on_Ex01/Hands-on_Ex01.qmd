@@ -1,6 +1,9 @@
 ---
 title: "Hands-on Exercise 1"
 author: "Wong Zi Qi"
+execute:
+  warning: false
+  message: false
 ---
 
 # 1. Getting Started

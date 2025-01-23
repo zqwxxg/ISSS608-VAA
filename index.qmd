@@ -2,4 +2,4 @@
 title: "ISSS608-VAA"
 ---
 
-Name: Wong Zi Qi<br>Student ID: 01499468<br>Email: ziqi.wong.2023\@mitb.smu.edu.sg
+Name: *Wong Zi Qi*<br>Student ID: *01499468*<br>Email: *ziqi.wong.2023\@mitb.smu.edu.sg*
