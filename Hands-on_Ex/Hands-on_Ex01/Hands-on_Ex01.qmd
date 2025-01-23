@@ -14,7 +14,7 @@ pacman::p_load(tidyverse)
 ## 1.2 Importing data
 
 ```{r}
-exam_data <- read_csv("Exam_data.csv")
+exam_data <- read_csv("../data/Exam_data.csv")
 ```
 
 # 2. R Graphics VS ggplot

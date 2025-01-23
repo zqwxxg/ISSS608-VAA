@@ -7,39 +7,11 @@
     "text": "Name: Wong Zi QiStudent ID: 01499468Email: ziqi.wong.2023@mitb.smu.edu.sg"
   },
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "About this site\n\n1 + 1\n\n[1] 2"
-  },
-  {
     "objectID": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html",
     "href": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html",
     "title": "Hands-on Exercise 1",
     "section": "",
-    "text": "pacman::p_load(tidyverse)\n\n\n\n\n\nexam_data &lt;- read_csv(\"Exam_data.csv\")\n\nRows: 322 Columns: 7\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (4): ID, CLASS, GENDER, RACE\ndbl (3): ENGLISH, MATHS, SCIENCE\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message."
-  },
-  {
-    "objectID": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html#getting-started",
-    "href": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html#getting-started",
-    "title": "Hands-on Exercise 1",
-    "section": "",
-    "text": "pacman::p_load(tidyverse)\n\n\n\n\n\nexam_data &lt;- read_csv(\"Exam_data.csv\")\n\nRows: 322 Columns: 7\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (4): ID, CLASS, GENDER, RACE\ndbl (3): ENGLISH, MATHS, SCIENCE\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message."
-  },
-  {
-    "objectID": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html#r-graphics-vs-ggplot",
-    "href": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html#r-graphics-vs-ggplot",
-    "title": "Hands-on Exercise 1",
-    "section": "2. R Graphics VS ggplot",
-    "text": "2. R Graphics VS ggplot\n\nR Graphicsggplot2\n\n\n\nhist(exam_data$MATHS)\n\n\n\n\n\n\n\n\n\n\n\nggplot(data=exam_data, aes(x = MATHS)) +\n  geom_histogram(bins=10, \n                 boundary = 100,\n                 color=\"black\", \n                 fill=\"grey\") +\n  ggtitle(\"Distribution of Maths scores\")"
-  },
-  {
-    "objectID": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html#essential-grammatical-elements-in-ggplot2",
-    "href": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html#essential-grammatical-elements-in-ggplot2",
-    "title": "Hands-on Exercise 1",
-    "section": "3. Essential Grammatical Elements in ggplot2",
-    "text": "3. Essential Grammatical Elements in ggplot2\n\n3.1 data\n\nggplot(data=exam_data)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\n\nA blank canvas appears.\nggplot() initializes a ggplot object.\n\n\n\n\n\n3.2 Aesthetic Mappings\n\nggplot(data=exam_data, \n       aes(x= MATHS))\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\n\nX-axis is included here,\n\n\n\n\n\n3.3 geom\ngeom_bar()\n\nggplot(data=exam_data, \n       aes(x=RACE)) + \n  geom_bar()\n\n\n\n\n\n\n\n\ngeom_dotplot()\n\nggplot(data=exam_data, \n       aes(x = MATHS)) +\n  geom_dotplot(dotsize = 0.5)\n\nBin width defaults to 1/30 of the range of the data. Pick better value with\n`binwidth`.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nWarning\n\n\n\n\nMisleading y-scale.\n\n\n\n\nggplot(data=exam_data, \n       aes(x = MATHS)) +\n  geom_dotplot(binwidth=2.5,         \n               dotsize = 0.5) +      \n  scale_y_continuous(NULL,           \n                     breaks = NULL)  \n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\n\nscale_y_continuous() is used to turn off the y-axis.\n\n\n\ngeom_histogram()\n\nggplot(data=exam_data, \n       aes(x = MATHS)) +\n  geom_histogram()\n\n`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.\n\n\n\n\n\n\n\n\n\nModifying geometric object\n\nggplot(data=exam_data, \n       aes(x= MATHS)) +\n  geom_histogram(bins=20,            \n                 color=\"black\",      \n                 fill=\"light blue\") \n\n\n\n\n\n\n\n\n\nggplot(data=exam_data, \n       aes(x= MATHS, \n           fill = GENDER)) +\n  geom_histogram(bins=20, \n                 color=\"grey30\")\n\n\n\n\n\n\n\n\ngeom_density()\n\nggplot(data=exam_data, \n       aes(x = MATHS, \n           colour = GENDER)) +\n  geom_density()\n\n\n\n\n\n\n\n\ngeom_boxplot()\n\nggplot(data=exam_data, \n       aes(y = MATHS, \n           x= GENDER)) +\n  geom_boxplot(notch=TRUE)\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\n\nNotch is used to help visually assess whether the medians of distributions differ.\n\n\n\ngeom_violin()\n\nggplot(data=exam_data, \n       aes(y = MATHS, \n           x= GENDER)) +\n  geom_violin()"
+    "text": "pacman::p_load(tidyverse)\n\n\n\n\n\nexam_data &lt;- read_csv(\"../data/Exam_data.csv\")\n\nRows: 322 Columns: 7\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (4): ID, CLASS, GENDER, RACE\ndbl (3): ENGLISH, MATHS, SCIENCE\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message."
   },
   {
     "objectID": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html#installing-packages",
@@ -53,7 +25,7 @@
     "href": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html#importing-data",
     "title": "Hands-on Exercise 1",
     "section": "",
-    "text": "exam_data &lt;- read_csv(\"Exam_data.csv\")\n\nRows: 322 Columns: 7\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (4): ID, CLASS, GENDER, RACE\ndbl (3): ENGLISH, MATHS, SCIENCE\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message."
+    "text": "exam_data &lt;- read_csv(\"../data/Exam_data.csv\")\n\nRows: 322 Columns: 7\n── Column specification ────────────────────────────────────────────────────────\nDelimiter: \",\"\nchr (4): ID, CLASS, GENDER, RACE\ndbl (3): ENGLISH, MATHS, SCIENCE\n\nℹ Use `spec()` to retrieve the full column specification for this data.\nℹ Specify the column types or set `show_col_types = FALSE` to quiet this message."
   },
   {
     "objectID": "Hands-on_Ex/Hands-on_Ex01/Hands-on_Ex01.html#data",
@@ -103,5 +75,47 @@
     "title": "Hands-on Exercise 1",
     "section": "3.7 Themes",
     "text": "3.7 Themes\n\nGrayClassicMinimal\n\n\n\nggplot(data=exam_data, \n       aes(x=RACE)) +\n  geom_bar() +\n  coord_flip() +\n  theme_gray()\n\n\n\n\n\n\n\n\n\n\n\nggplot(data=exam_data, \n       aes(x=RACE)) +\n  geom_bar() +\n  coord_flip() +\n  theme_classic()\n\n\n\n\n\n\n\n\n\n\n\nggplot(data=exam_data, \n       aes(x=RACE)) +\n  geom_bar() +\n  coord_flip() +\n  theme_minimal()"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html",
+    "href": "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html",
+    "title": "Hands-on Exercise 2",
+    "section": "",
+    "text": "pacman::p_load(ggrepel, patchwork, \n               ggthemes, hrbrthemes,\n               tidyverse)\n\n\n\n\n\nexam_data &lt;- read_csv(\"../data/Exam_data.csv\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html#installing-packages",
+    "href": "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html#installing-packages",
+    "title": "Hands-on Exercise 2",
+    "section": "",
+    "text": "pacman::p_load(ggrepel, patchwork, \n               ggthemes, hrbrthemes,\n               tidyverse)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html#importing-data",
+    "href": "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html#importing-data",
+    "title": "Hands-on Exercise 2",
+    "section": "",
+    "text": "exam_data &lt;- read_csv(\"../data/Exam_data.csv\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html#single-graph",
+    "href": "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html#single-graph",
+    "title": "Hands-on Exercise 2",
+    "section": "4.1 Single graph",
+    "text": "4.1 Single graph\n\np1p2p3\n\n\n\np1 &lt;- ggplot(data=exam_data, \n             aes(x = MATHS)) +\n  geom_histogram(bins=20, \n                 boundary = 100,\n                 color=\"grey25\", \n                 fill=\"grey90\") + \n  coord_cartesian(xlim=c(0,100)) +\n  ggtitle(\"Distribution of Maths scores\")\n\np1\n\n\n\n\n\n\n\n\n\n\n\np2 &lt;- ggplot(data=exam_data, \n             aes(x = ENGLISH)) +\n  geom_histogram(bins=20, \n                 boundary = 100,\n                 color=\"grey25\", \n                 fill=\"grey90\") +\n  coord_cartesian(xlim=c(0,100)) +\n  ggtitle(\"Distribution of English scores\")\n\np2\n\n\n\n\n\n\n\n\n\n\n\np3 &lt;- ggplot(data=exam_data, \n             aes(x= MATHS, \n                 y=ENGLISH)) +\n  geom_point() +\n  geom_smooth(method=lm, \n              size=0.5) +  \n  coord_cartesian(xlim=c(0,100),\n                  ylim=c(0,100)) +\n  ggtitle(\"English scores versus Maths scores for Primary 3\")\n\np3"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html#composite-graphs-patchwork",
+    "href": "Hands-on_Ex/Hands-on_Ex02/Hands-on_Ex02.html#composite-graphs-patchwork",
+    "title": "Hands-on Exercise 2",
+    "section": "4.2 Composite graphs: patchwork",
+    "text": "4.2 Composite graphs: patchwork\n\nTwo-Column Layout using the Plus Sign +.\nParenthesis () to create a subplot group.\nTwo-Row Layout using the Division Sign /\n\n\nCombining 2 graphs\n\np1 + p2\n\n\n\n\n\n\n\n\n\n\nCombining 3 graphs\n\n(p1 / p2) | p3\n\n\n\n\n\n\n\n\n\n\nCreating composite fig with tag\n\n((p1 / p2) | p3) + \n  plot_annotation(tag_levels = 'I')\n\n\n\n\n\n\n\n\n\n\nCreating fig with insert\n\np3 + inset_element(p2, \n                   left = 0.02, \n                   bottom = 0.7, \n                   right = 0.5, \n                   top = 1)\n\n\n\n\n\n\n\n\n\n\nCreating composite fig with patchwork & ggtheme\n\npatchwork &lt;- (p1 / p2) | p3\npatchwork & theme_economist()"
   }
 ]
