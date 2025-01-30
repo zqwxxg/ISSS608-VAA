@@ -1,5 +1,5 @@
 ---
-title: "Hands-on Exercise 1"
+title: "Hands-on Exercise 1: A Layered Grammar of Graphics: ggplot2 methods"
 author: "Wong Zi Qi"
 execute:
   warning: false
@@ -259,8 +259,9 @@ ggplot(data=exam_data,
 
 ## 3.7 Themes
 
-::: {.panel-tabset}
+::: panel-tabset
 # Gray
+
 ```{r}
 ggplot(data=exam_data, 
        aes(x=RACE)) +
@@ -270,6 +271,7 @@ ggplot(data=exam_data,
 ```
 
 # Classic
+
 ```{r}
 ggplot(data=exam_data, 
        aes(x=RACE)) +
@@ -279,6 +281,7 @@ ggplot(data=exam_data,
 ```
 
 # Minimal
+
 ```{r}
 ggplot(data=exam_data, 
        aes(x=RACE)) +
