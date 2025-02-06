@@ -4,6 +4,7 @@ author: "Wong Zi Qi"
 execute:
   warning: false
   message: false
+  freeze: true
 ---
 
 # 1. Getting Started
