@@ -4,7 +4,6 @@ author: "Wong Zi Qi"
 execute:
   warning: false
   message: false
-  freeze: true
 ---
 
 # Programming Interactive Data Visualisation with R
