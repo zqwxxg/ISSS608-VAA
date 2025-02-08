@@ -4,6 +4,7 @@ author: "Wong Zi Qi"
 execute:
   warning: false
   message: false
+  freeze: true
 ---
 
 # 1. Getting Started
@@ -19,7 +20,7 @@ pacman::p_load(ggrepel, patchwork,
 ## 1.2 Importing data
 
 ```{r}
-exam_data <- read_csv("./data/Exam_data.csv")
+exam_data <- read_csv("../data/Exam_data.csv")
 ```
 
 # 2. Ggplot annotation

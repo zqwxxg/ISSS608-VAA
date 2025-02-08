@@ -4,6 +4,7 @@ author: "Wong Zi Qi"
 execute:
   warning: false
   message: false
+  freeze: true
 ---
 
 # *Visualizing Distribution*
@@ -16,7 +17,7 @@ pacman::p_load(ggdist, ggridges, ggthemes,
 ```
 
 ```{r}
-exam <- read_csv("data/Exam_data.csv")
+exam <- read_csv("../data/Exam_data.csv")
 ```
 
 ## 2. Visualising Distribution with Ridgeline Plot
@@ -231,7 +232,7 @@ pacman::p_load(ggstatsplot, tidyverse)
 ```
 
 ```{r}
-exam <- read_csv("data/Exam_data.csv")
+exam <- read_csv("../data/Exam_data.csv")
 
 as_tibble(exam)
 ```
@@ -342,7 +343,7 @@ pacman::p_load(readxl, performance, parameters, see)
 ```
 
 ```{r}
-car_resale <- read_xls("data/ToyotaCorolla.xls", 
+car_resale <- read_xls("../data/ToyotaCorolla.xls", 
                        "data")
 car_resale
 ```
@@ -420,7 +421,7 @@ pacman::p_load(plotly, crosstalk, DT,
 ```
 
 ```{r}
-exam <- read_csv("data/Exam_data.csv")
+exam <- read_csv("../data/Exam_data.csv")
 ```
 
 ## 2. Visualizing the uncertainty of point estimates: *ggplot2*
@@ -669,7 +670,7 @@ pacman::p_load(tidyverse, FunnelPlotR, plotly, knitr)
 ```
 
 ```{r}
-covid19 <- read_csv("data/COVID-19_DKI_Jakarta.csv") %>%
+covid19 <- read_csv("../data/COVID-19_DKI_Jakarta.csv") %>%
   mutate_if(is.character, as.factor)
 
 covid19

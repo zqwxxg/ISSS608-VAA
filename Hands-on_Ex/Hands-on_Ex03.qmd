@@ -4,6 +4,7 @@ author: "Wong Zi Qi"
 execute:
   warning: false
   message: false
+  freeze: true
 ---
 
 # Programming Interactive Data Visualisation with R
@@ -16,7 +17,7 @@ pacman::p_load(ggiraph, plotly,
 ```
 
 ```{r}
-exam_data <- read_csv("./data/Exam_data.csv")
+exam_data <- read_csv("../data/Exam_data.csv")
 ```
 
 ## 2. Interactive Data Visualization: ggiraph
@@ -399,7 +400,7 @@ pacman::p_load(readxl, gifski, gapminder,
 
 ```{r}
 col <- c("Country", "Continent")
-globalPop <- read_xls("./data/GlobalPopulation.xls",
+globalPop <- read_xls("../data/GlobalPopulation.xls",
                       sheet="Data") %>%
   mutate_at(col, as.factor) %>%
   mutate(Year = as.integer(Year))
@@ -411,7 +412,7 @@ globalPop <- read_xls("./data/GlobalPopulation.xls",
 #| eval: false
 
 col <- c("Country", "Continent")
-globalPop <- read_xls("./data/GlobalPopulation.xls",
+globalPop <- read_xls("../data/GlobalPopulation.xls",
                       sheet="Data") %>%
   mutate(across(col, as.factor)) %>%
   mutate(Year = as.integer(Year))

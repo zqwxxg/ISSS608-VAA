@@ -9,3 +9,13 @@ execute:
   warning: false
   freeze: true
 ---
+
+1. Getting Started
+
+```{r}
+pacman::p_load(tidyverse)
+```
+
+```{r}
+data <- read_csv("Ship_Performance_Dataset.csv")
+```
