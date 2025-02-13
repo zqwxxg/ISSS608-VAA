@@ -1,0 +1,15 @@
+{
+  "hash": "c137d8d487e1f6ba086c4ac534689b25",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Take Home Exercise 1\"\nauthor: \"Wong Zi Qi\"\ndate: \"February 1, 2025\"\ndate-modified: \"last modified\"\nexecute: \n  echo: true\n  eval: true\n  warning: false\n  freeze: true\n---\n\n\n\n1. Getting Started\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\npacman::p_load(tidyverse)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\ndata <- read_csv(\"Ship_Performance_Dataset.csv\")\n```\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

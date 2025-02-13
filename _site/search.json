@@ -1,10 +1,17 @@
 [
   {
-    "objectID": "In-home_Ex/In-home_Ex04.html",
-    "href": "In-home_Ex/In-home_Ex04.html",
-    "title": "In-home Exercise 4",
+    "objectID": "Take-home_Ex/Take-home_Ex01/take-home_Ex01.html",
+    "href": "Take-home_Ex/Take-home_Ex01/take-home_Ex01.html",
+    "title": "Take Home Exercise 1",
     "section": "",
-    "text": "Getting Started\n\n\npacman::p_load(haven, SmartEDA, tidyverse, tidymodels)"
+    "text": "Getting Started\n\n\npacman::p_load(tidyverse)\n\n\ndata &lt;- read_csv(\"Ship_Performance_Dataset.csv\")"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex04.html",
+    "href": "In-class_Ex/In-class_Ex04.html",
+    "title": "In-class Exercise 4",
+    "section": "",
+    "text": "1. Getting Started\n\npacman::p_load(haven, SmartEDA, tidyverse, tidymodels, ggridges, ggthemes, colorspace, ggstatsplot, ggdist)\n\n\nexam_data &lt;- read_csv(\"../data/Exam_data.csv\")\n\n\n\n2. Plotting\n\nggplot(data = exam_data, aes(x = ENGLISH,y = CLASS)) +\n  geom_boxplot()\n\n\n\n\n\n\n\n\n\nggplot(exam_data, \n       aes(x = ENGLISH, \n           y = CLASS)) +\n  geom_density_ridges(\n    scale = 3,\n    rel_min_height = 0.01,\n    bandwidth = 3.4,\n    fill = lighten(\"#7097BB\", .3),\n    color = \"white\"\n  ) +\n  scale_x_continuous(\n    name = \"English grades\",\n    expand = c(0, 0)\n    ) +\n  scale_y_discrete(name = NULL, expand = expansion(add = c(0.2, 2.6))) +\n  theme_ridges()\n\n\n\n\n\n\n\n\n\nggplot(exam_data,\n       aes(x = RACE,\n           y = ENGLISH)) +\n  stat_halfeye(adjust = 0.5,\n               justification = -0.2,\n               .width = 0,\n               point_colout = NA) +\n  geom_boxplot(width = .20,\n               outlier.shape = NA) +\n  stat_dots(side = \"left\",\n            justification = 1.2,\n            binwidth = .5,\n            dotsize = 2)\n\n\n\n\n\n\n\n\n\nggbetweenstats(\n  data = exam_data,\n  x = GENDER,\n  y = MATHS,\n  type = \"np\", # non-parametric\n  messages = FALSE\n)"
   },
   {
     "objectID": "Hands-on_Ex/Hands-on_Ex03.html",
@@ -264,19 +271,5 @@
     "title": "ISSS608-VAA",
     "section": "",
     "text": "Name: Wong Zi QiStudent ID: 01499468Email: ziqi.wong.2023@mitb.smu.edu.sg"
-  },
-  {
-    "objectID": "In-class_Ex/In-class_Ex04.html",
-    "href": "In-class_Ex/In-class_Ex04.html",
-    "title": "In-class Exercise 4",
-    "section": "",
-    "text": "1. Getting Started\n\npacman::p_load(haven, SmartEDA, tidyverse, tidymodels, ggridges, ggthemes, colorspace, ggstatsplot, ggdist)\n\n\nexam_data &lt;- read_csv(\"../data/Exam_data.csv\")\n\n\n\n2. Plotting\n\nggplot(data = exam_data, aes(x = ENGLISH,y = CLASS)) +\n  geom_boxplot()\n\n\n\n\n\n\n\n\n\nggplot(exam_data, \n       aes(x = ENGLISH, \n           y = CLASS)) +\n  geom_density_ridges(\n    scale = 3,\n    rel_min_height = 0.01,\n    bandwidth = 3.4,\n    fill = lighten(\"#7097BB\", .3),\n    color = \"white\"\n  ) +\n  scale_x_continuous(\n    name = \"English grades\",\n    expand = c(0, 0)\n    ) +\n  scale_y_discrete(name = NULL, expand = expansion(add = c(0.2, 2.6))) +\n  theme_ridges()\n\n\n\n\n\n\n\n\n\nggplot(exam_data,\n       aes(x = RACE,\n           y = ENGLISH)) +\n  stat_halfeye(adjust = 0.5,\n               justification = -0.2,\n               .width = 0,\n               point_colout = NA) +\n  geom_boxplot(width = .20,\n               outlier.shape = NA) +\n  stat_dots(side = \"left\",\n            justification = 1.2,\n            binwidth = .5,\n            dotsize = 2)\n\n\n\n\n\n\n\n\n\nggbetweenstats(\n  data = exam_data,\n  x = GENDER,\n  y = MATHS,\n  type = \"np\", # non-parametric\n  messages = FALSE\n)"
-  },
-  {
-    "objectID": "Take-home_Ex/Take-home_Ex01/take-home_Ex01.html",
-    "href": "Take-home_Ex/Take-home_Ex01/take-home_Ex01.html",
-    "title": "Take Home Exercise 1",
-    "section": "",
-    "text": "Getting Started\n\n\npacman::p_load(tidyverse)\n\n\ndata &lt;- read_csv(\"Ship_Performance_Dataset.csv\")"
   }
 ]
