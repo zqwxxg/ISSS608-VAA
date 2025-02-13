@@ -1,0 +1,903 @@
+---
+title: "Hands-on Exercise 5"
+author: "Wong Zi Qi"
+execute:
+  warning: false
+  message: false
+---
+
+# ***Creating Ternary Plot***
+
+## 1. Getting Started
+
+```{r}
+pacman::p_load(plotly, ggtern, tidyverse)
+```
+
+```{r}
+pop_data <- read_csv("../data/respopagsex2000to2018_tidy.csv") 
+```
+
+Prepare data by using `mutate()`.
+
+```{r}
+agpop_mutated <- pop_data %>%
+  mutate(`Year` = as.character(Year))%>%
+  spread(AG, Population) %>%
+  mutate(YOUNG = rowSums(.[4:8]))%>%
+  mutate(ACTIVE = rowSums(.[9:16]))  %>%
+  mutate(OLD = rowSums(.[17:21])) %>%
+  mutate(TOTAL = rowSums(.[22:24])) %>%
+  filter(Year == 2018)%>%
+  filter(TOTAL > 0)
+```
+
+## 2. Plotting Ternary Diagram
+
+### 2.1 Plotting a static ternary diagram
+
+::: panel-tabset
+# Original
+
+```{r}
+ggtern(data=agpop_mutated,aes(x=YOUNG,y=ACTIVE, z=OLD)) +
+  geom_point()
+```
+
+# Enhanced
+
+```{r}
+ggtern(data=agpop_mutated, aes(x=YOUNG,y=ACTIVE, z=OLD)) +
+  geom_point() +
+  labs(title="Population structure, 2015") +
+  theme_rgbw()
+```
+:::
+
+### 2.2 Plotting an interative ternary diagram
+
+```{r}
+#| code-fold: true
+
+
+# reusable function for creating annotation object
+label <- function(txt) {
+  list(
+    text = txt, 
+    x = 0.1, y = 1,
+    ax = 0, ay = 0,
+    xref = "paper", yref = "paper", 
+    align = "center",
+    font = list(family = "serif", size = 15, color = "white"),
+    bgcolor = "#b3b3b3", bordercolor = "black", borderwidth = 2
+  )
+}
+
+# reusable function for axis formatting
+axis <- function(txt) {
+  list(
+    title = txt, tickformat = ".0%", tickfont = list(size = 10)
+  )
+}
+
+ternaryAxes <- list(
+  aaxis = axis("Young"), 
+  baxis = axis("Active"), 
+  caxis = axis("Old")
+)
+
+# Initiating a plotly visualization 
+plot_ly(
+  agpop_mutated, 
+  a = ~YOUNG, 
+  b = ~ACTIVE, 
+  c = ~OLD, 
+  color = I("black"), 
+  type = "scatterternary"
+) %>%
+  layout(
+    annotations = label("Ternary Markers"), 
+    ternary = ternaryAxes
+  )
+```
+
+# ***Visual Correlation Analysis***
+
+## 1. Getting Started
+
+```{r}
+pacman::p_load(corrplot, ggstatsplot, tidyverse)
+```
+
+```{r}
+wine <- read_csv("../data/wine_quality.csv")
+```
+
+## 2. Building Correlation Matrix: *pairs()*
+
+### 2.1 Building a basic correlation matrix
+
+::: {.panel-tabset group="basic"}
+# 1
+
+```{r}
+pairs(wine[,1:11])
+```
+
+# 2
+
+```{r}
+pairs(wine[,2:12])
+```
+:::
+
+### 2.2 Drawing the lower corner
+
+::: panel-tabset
+# Upper
+
+```{r}
+pairs(wine[,2:12], upper.panel = NULL)
+```
+
+# Lower
+
+```{r}
+pairs(wine[,2:12], lower.panel = NULL)
+```
+:::
+
+### 2.3 Including with correlation coefficients
+
+```{r}
+#| code-fold: true
+
+panel.cor <- function(x, y, digits=2, prefix="", cex.cor, ...) {
+usr <- par("usr")
+on.exit(par(usr))
+par(usr = c(0, 1, 0, 1))
+r <- abs(cor(x, y, use="complete.obs"))
+txt <- format(c(r, 0.123456789), digits=digits)[1]
+txt <- paste(prefix, txt, sep="")
+if(missing(cex.cor)) cex.cor <- 0.8/strwidth(txt)
+text(0.5, 0.5, txt, cex = cex.cor * (1 + r) / 2)
+}
+
+pairs(wine[,2:12], 
+      upper.panel = panel.cor)
+```
+
+## 3. Visualising Correlation Matrix: *ggcormat()*
+
+### 3.1 The basic plot
+
+```{r}
+#| code-fold: true
+
+
+ggstatsplot::ggcorrmat(
+  data = wine, 
+  cor.vars = 1:11,
+  ggcorrplot.args = list(outline.color = "black", 
+                         hc.order = TRUE,
+                         tl.cex = 10),
+  title    = "Correlogram for wine dataset",
+  subtitle = "Four pairs are no significant at p < 0.05"
+)
+```
+
+::: callout-note
+-   `cor.vars` argument is used to compute the correlation matrix needed to build the corrgram.
+-   `ggcorrplot.args` argument provide additional (mostly aesthetic) arguments that will be passed to ggcorrplot::ggcorrplot function. The list should avoid any of the following arguments since they are already internally being used: `corr`, `method`, `p.mat`, `sig.level`, `ggtheme`, `colors`, `lab`, `pch`, `legend.title`, `digits`.
+:::
+
+### 3.2 Building multiple plots
+
+```{r}
+#| code-fold: true
+
+
+grouped_ggcorrmat(
+  data = wine,
+  cor.vars = 1:11,
+  grouping.var = type,
+  type = "robust",
+  p.adjust.method = "holm",
+  plotgrid.args = list(ncol = 2),
+  ggcorrplot.args = list(outline.color = "black", 
+                         hc.order = TRUE,
+                         tl.cex = 10),
+  annotation.args = list(
+    tag_levels = "a",
+    title = "Correlogram for wine dataset",
+    subtitle = "The measures are: alcohol, sulphates, fixed acidity, citric acid, chlorides, residual sugar, density, free sulfur dioxide and volatile acidity",
+    caption = "Dataset: UCI Machine Learning Repository"
+  )
+)
+```
+
+::: callout-note
+-   to build a facet plot, the only argument needed is grouping.var.
+:::
+
+## 4. Visualising Correlation Matrix: *corrplot*
+
+### 4.1 Getting Started
+
+```{r}
+wine.cor <- cor(wine[, 1:11])
+corrplot(wine.cor)
+```
+
+### 4.2 Working with visual geometrics
+
+```{r}
+corrplot(wine.cor, 
+         method = "ellipse") 
+```
+
+### 4.3 Working with layout
+
+::: {.panel-tabset group="layout"}
+# 1
+
+```{r}
+corrplot(wine.cor, 
+         method = "ellipse", 
+         type="lower")
+```
+
+# 2
+
+```{r}
+corrplot(wine.cor, 
+         method = "ellipse", 
+         type="lower",
+         diag = FALSE,
+         tl.col = "black")
+```
+:::
+
+### 4.4 Working with mixed layout
+
+```{r}
+corrplot.mixed(wine.cor, 
+               lower = "ellipse", 
+               upper = "number",
+               tl.pos = "lt",
+               diag = "l",
+               tl.col = "black")
+```
+
+### 4.5 Combining corrgram with the significant test
+
+Use the `cor.mtest()` to compute the p-values and confidence interval for each pair of variables. Then use the `p.mat` argument.
+
+```{r}
+wine.sig = cor.mtest(wine.cor, conf.level= .95)
+```
+
+```{r}
+corrplot(wine.cor,
+         method = "number",
+         type = "lower",
+         diag = FALSE,
+         tl.col = "black",
+         tl.srt = 45,
+         p.mat = wine.sig$p,
+         sig.level = .05)
+```
+
+### 4.6 Reorder a corrgram
+
+-   `AOE` is for the angular order of the eigenvectors.
+-   `FPC` for the first principal component order.
+-   `hclust` for hierarchical clustering order, and `hclust.method` for the agglomeration method to be used.
+    -   `hclust.method` should be one of “ward”, “single”, “complete”, “average”, “mcquitty”, “median” or “centroid”.
+-   `alphabet` for alphabetical order.
+
+```{r}
+#| code-fold: true
+
+
+corrplot.mixed(wine.cor, 
+               lower = "ellipse", 
+               upper = "number",
+               tl.pos = "lt",
+               diag = "l",
+               order="AOE",
+               tl.col = "black")
+```
+
+### 4.7 Reordering a correlation matrix using hclust
+
+```{r}
+#| code-fold: true
+
+
+corrplot(wine.cor, 
+         method = "ellipse", 
+         tl.pos = "lt",
+         tl.col = "black",
+         order="hclust",
+         hclust.method = "ward.D",
+         addrect = 3)
+```
+
+# ***Heatmap for Visualising and Analysing Multivariate Data***
+
+## 1. Getting Started
+
+```{r}
+pacman::p_load(seriation, dendextend, heatmaply, tidyverse)
+```
+
+```{r}
+wh <- read_csv("../data/WHData-2018.csv")
+
+row.names(wh) <- wh$Country
+
+# Transform into matrix
+wh1 <- dplyr::select(wh, c(3, 7:12))
+wh_matrix <- data.matrix(wh)
+```
+
+## 2. Static Heatmap
+
+### 2.1 *heatmap()* of R Stats
+
+```{r}
+#| code-fold: true
+
+
+wh_heatmap <- heatmap(wh_matrix,
+                      Rowv=NA, Colv=NA)
+```
+
+Normalises the matrix column-wise.
+
+```{r}
+#| code-fold: true
+
+
+wh_heatmap <- heatmap(wh_matrix,
+                      scale="column",
+                      cexRow = 0.6, 
+                      cexCol = 0.8,
+                      margins = c(10, 4))
+```
+
+## 3. Creating Interactive Heatmap
+
+### 3.1 Working with heatmaply
+
+::: {.panel-tabset group="heatmap"}
+# 1
+
+```{r}
+heatmaply(mtcars)
+```
+
+# 2
+
+```{r}
+heatmaply(wh_matrix[, -c(1, 2, 4, 5)])
+```
+:::
+
+### 3.2 Data trasformation
+
+::: panel-tabset
+# Scaling
+
+```{r}
+heatmaply(wh_matrix[, -c(1, 2, 4, 5)],
+          scale = "column")
+```
+
+# Normalising
+
+```{r}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]))
+```
+
+# Percentising
+
+```{r}
+heatmaply(percentize(wh_matrix[, -c(1, 2, 4, 5)]))
+```
+:::
+
+### 3.3 Clustering algorithm
+
+#### Manual approach
+
+```{r}
+#| code-fold: true
+
+
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          dist_method = "euclidean",
+          hclust_method = "ward.D")
+```
+
+#### Statistical approach
+
+`dend_expend()` will be used to determine the recommended clustering method to be used.
+
+```{r}
+wh_d <- dist(normalize(wh_matrix[, -c(1, 2, 4, 5)]), method = "euclidean")
+dend_expend(wh_d)[[3]]
+```
+
+`find_k()` is used to determine the optimal number of cluster.
+
+```{r}
+wh_clust <- hclust(wh_d, method = "average")
+num_k <- find_k(wh_clust)
+plot(num_k)
+```
+
+Figure above shows that k=3 would be good.
+
+```{r}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          dist_method = "euclidean",
+          hclust_method = "average",
+          k_row = 3)
+```
+
+### 3.4 Seriation
+
+::: panel-tabset
+# OLO
+
+```{r}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          seriate = "OLO")
+```
+
+# GW
+
+```{r}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          seriate = "GW")
+```
+
+# Mean
+
+```{r}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          seriate = "mean")
+```
+
+# None
+
+```{r}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          seriate = "none")
+```
+:::
+
+### 3.5 Working with colour palettes
+
+```{r}
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          seriate = "none",
+          colors = Blues)
+```
+
+### 3.6 Finishing Touch
+
+```{r}
+#| code-fold: true
+
+
+heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
+          Colv=NA,
+          seriate = "none",
+          colors = Blues,
+          k_row = 5,
+          margins = c(NA,200,60,NA),
+          fontsize_row = 4,
+          fontsize_col = 5,
+          main="World Happiness Score and Variables by Country, 2018 \nDataTransformation using Normalise Method",
+          xlab = "World Happiness Indicators",
+          ylab = "World Countries"
+          )
+```
+
+# ***Visual Multivariate Analysis with Parallel Coordinates Plot***
+
+## 1. Getting Started
+
+```{r}
+pacman::p_load(GGally, parallelPlot, tidyverse)
+```
+
+```{r}
+wh <- read_csv("../data/WHData-2018.csv")
+```
+
+## 2. Plotting Static Parallel Coordinates Plot
+
+### 2.1 Plotting a simple parallel coordinates
+
+```{r}
+ggparcoord(data = wh, 
+           columns = c(7:12))
+```
+
+### 2.2 Plotting a parallel coordinates with boxplot
+
+```{r}
+#| code-fold: true
+
+
+ggparcoord(data = wh, 
+           columns = c(7:12), 
+           groupColumn = 2,
+           scale = "uniminmax",
+           alphaLines = 0.2,
+           boxplot = TRUE, 
+           title = "Parallel Coordinates Plot of World Happines Variables")
+```
+
+::: callout-note
+-   `groupColumn` argument is used to group the observations (i.e. parallel lines) by using a single variable (i.e. Region) and colour the parallel coordinates lines by region name.
+-   `scale` argument is used to scale the variables in the parallel coordinate plot by using `uniminmax` method. The method univariately scale each variable so the minimum of the variable is zero and the maximum is one.
+-   `alphaLines` argument is used to reduce the intensity of the line colour to 0.2. The permissible value range is between 0 to 1.
+:::
+
+### 2.3 Parallel coordinates with facet
+
+::: panel-tabset
+# Basic
+
+```{r}
+ggparcoord(data = wh, 
+           columns = c(7:12), 
+           groupColumn = 2,
+           scale = "uniminmax",
+           alphaLines = 0.2,
+           boxplot = TRUE, 
+           title = "Multiple Parallel Coordinates Plots of World Happines Variables by Region") +
+  facet_wrap(~ Region)
+```
+
+# Rotating x-axis text label
+
+```{r}
+ggparcoord(data = wh, 
+           columns = c(7:12), 
+           groupColumn = 2,
+           scale = "uniminmax",
+           alphaLines = 0.2,
+           boxplot = TRUE, 
+           title = "Multiple Parallel Coordinates Plots of World Happines Variables by Region") +
+  facet_wrap(~ Region) + 
+  theme(axis.text.x = element_text(angle = 30))
+```
+
+# Adjusting the rotated x-axis text label
+
+```{r}
+ggparcoord(data = wh, 
+           columns = c(7:12), 
+           groupColumn = 2,
+           scale = "uniminmax",
+           alphaLines = 0.2,
+           boxplot = TRUE, 
+           title = "Multiple Parallel Coordinates Plots of World Happines Variables by Region") +
+  facet_wrap(~ Region) + 
+  theme(axis.text.x = element_text(angle = 30, hjust=1))
+```
+:::
+
+## 3. Plotting Interactive Parallel Coordinates Plot: *parallelPlot*
+
+### 3.1 Plotting
+
+::: panel-tabset
+# Basic
+
+```{r}
+wh <- wh %>%
+  select("Happiness score", c(7:12))
+parallelPlot(wh,
+             width = 320,
+             height = 250)
+```
+
+# Rotate axis label
+
+```{r}
+parallelPlot(wh,
+             rotateTitle = TRUE)
+```
+
+# Changing the colour scheme
+
+```{r}
+parallelPlot(wh,
+             continuousCS = "YlOrRd",
+             rotateTitle = TRUE)
+```
+:::
+
+### 3.2 Parallel coordinates plot with histogram
+
+```{r}
+histoVisibility <- rep(TRUE, ncol(wh))
+parallelPlot(wh,
+             rotateTitle = TRUE,
+             histoVisibility = histoVisibility)
+```
+
+# ***Treemap Visualisation***
+
+## 1. Data Wrangling
+
+```{r}
+pacman::p_load(treemap, treemapify, tidyverse) 
+```
+
+```{r}
+realis2018 <- read_csv("../data/realis2018.csv")
+```
+
+::: panel-tabset
+# Witout Pipe
+
+```{r}
+realis2018_grouped <- group_by(realis2018, `Project Name`,
+                               `Planning Region`, `Planning Area`, 
+                               `Property Type`, `Type of Sale`)
+realis2018_summarised <- summarise(realis2018_grouped, 
+                          `Total Unit Sold` = sum(`No. of Units`, na.rm = TRUE),
+                          `Total Area` = sum(`Area (sqm)`, na.rm = TRUE),
+                          `Median Unit Price ($ psm)` = median(`Unit Price ($ psm)`, na.rm = TRUE), 
+                          `Median Transacted Price` = median(`Transacted Price ($)`, na.rm = TRUE))
+```
+
+# With Pipe
+
+```{r}
+#| eval: false
+
+
+realis2018_summarised <- realis2018 %>% 
+  group_by(`Project Name`,`Planning Region`, 
+           `Planning Area`, `Property Type`, 
+           `Type of Sale`) %>%
+  summarise(`Total Unit Sold` = sum(`No. of Units`, na.rm = TRUE), 
+            `Total Area` = sum(`Area (sqm)`, na.rm = TRUE),
+            `Median Unit Price ($ psm)` = median(`Unit Price ($ psm)`, na.rm = TRUE),
+            `Median Transacted Price` = median(`Transacted Price ($)`, na.rm = TRUE))
+```
+:::
+
+## 2. Designing Treemap with *treemap*
+
+### 2.1 Designing a static treemap
+
+```{r}
+realis2018_selected <- realis2018_summarised %>%
+  filter(`Property Type` == "Condominium", `Type of Sale` == "Resale")
+```
+
+### 2.2 Using the basic arguments
+
+```{r}
+#| code-fold: true
+
+
+treemap(realis2018_selected,
+        index=c("Planning Region", "Planning Area", "Project Name"),
+        vSize="Total Unit Sold",
+        vColor="Median Unit Price ($ psm)",
+        title="Resale Condominium by Planning Region and Area, 2017",
+        title.legend = "Median Unit Price (S$ per sq. m)"
+        )
+```
+
+::: callout-note
+-   `index`
+-   The index vector must consist of at least two column names or else no hierarchy treemap will be plotted.
+-   If multiple column names are provided, such as the code chunk above, the first name is the highest aggregation level, the second name the second highest aggregation level, and so on.
+-   `vSize`
+-   The column must not contain negative values. This is because it’s vaues will be used to map the sizes of the rectangles of the treemaps.
+:::
+
+### 2.3 Working with vColor and type arguments
+
+```{r}
+#| code-fold: true
+
+
+treemap(realis2018_selected,
+        index=c("Planning Region", "Planning Area", "Project Name"),
+        vSize="Total Unit Sold",
+        vColor="Median Unit Price ($ psm)",
+        type = "value",
+        title="Resale Condominium by Planning Region and Area, 2017",
+        title.legend = "Median Unit Price (S$ per sq. m)"
+        )
+```
+
+### 2.4 Colours in treemap package
+
+#### Value type
+
+```{r}
+#| code-fold: true
+
+
+treemap(realis2018_selected,
+        index=c("Planning Region", "Planning Area", "Project Name"),
+        vSize="Total Unit Sold",
+        vColor="Median Unit Price ($ psm)",
+        type="value",
+        palette="RdYlBu", 
+        title="Resale Condominium by Planning Region and Area, 2017",
+        title.legend = "Median Unit Price (S$ per sq. m)"
+        )
+```
+
+#### Manual type
+
+::: panel-tabset
+# Red
+
+```{r}
+treemap(realis2018_selected,
+        index=c("Planning Region", "Planning Area", "Project Name"),
+        vSize="Total Unit Sold",
+        vColor="Median Unit Price ($ psm)",
+        type="manual",
+        palette="RdYlBu", 
+        title="Resale Condominium by Planning Region and Area, 2017",
+        title.legend = "Median Unit Price (S$ per sq. m)"
+        )
+```
+
+# Blue
+
+```{r}
+treemap(realis2018_selected,
+        index=c("Planning Region", "Planning Area", "Project Name"),
+        vSize="Total Unit Sold",
+        vColor="Median Unit Price ($ psm)",
+        type="manual",
+        palette="Blues", 
+        title="Resale Condominium by Planning Region and Area, 2017",
+        title.legend = "Median Unit Price (S$ per sq. m)"
+        )
+```
+:::
+
+### 2.5 Treemap Layout
+
+::: panel-tabset
+# With *algorithm*
+
+```{r}
+treemap(realis2018_selected,
+        index=c("Planning Region", "Planning Area", "Project Name"),
+        vSize="Total Unit Sold",
+        vColor="Median Unit Price ($ psm)",
+        type="manual",
+        palette="Blues", 
+        algorithm = "squarified",
+        title="Resale Condominium by Planning Region and Area, 2017",
+        title.legend = "Median Unit Price (S$ per sq. m)"
+        )
+```
+
+# Using *sortID*
+
+```{r}
+treemap(realis2018_selected,
+        index=c("Planning Region", "Planning Area", "Project Name"),
+        vSize="Total Unit Sold",
+        vColor="Median Unit Price ($ psm)",
+        type="manual",
+        palette="Blues", 
+        algorithm = "pivotSize",
+        sortID = "Median Transacted Price",
+        title="Resale Condominium by Planning Region and Area, 2017",
+        title.legend = "Median Unit Price (S$ per sq. m)"
+        )
+```
+:::
+
+## 3. Designing Treemap using *treemapify*
+
+### 3.1 Designing a basic treemap
+
+```{r}
+#| code-fold: true
+
+
+ggplot(data=realis2018_selected, 
+       aes(area = `Total Unit Sold`,
+           fill = `Median Unit Price ($ psm)`),
+       layout = "scol",
+       start = "bottomleft") + 
+  geom_treemap() +
+  scale_fill_gradient(low = "light blue", high = "blue")
+```
+
+### 3.2 Defining hierarchy
+
+::: panel-tabset
+# Group by Planning Region
+
+```{r}
+ggplot(data=realis2018_selected, 
+       aes(area = `Total Unit Sold`,
+           fill = `Median Unit Price ($ psm)`,
+           subgroup = `Planning Region`),
+       start = "topleft") + 
+  geom_treemap()
+```
+
+# Group by Planning Area
+
+```{r}
+ggplot(data=realis2018_selected, 
+       aes(area = `Total Unit Sold`,
+           fill = `Median Unit Price ($ psm)`,
+           subgroup = `Planning Region`,
+           subgroup2 = `Planning Area`)) + 
+  geom_treemap()
+```
+
+# Adding boundary line
+
+```{r}
+ggplot(data=realis2018_selected, 
+       aes(area = `Total Unit Sold`,
+           fill = `Median Unit Price ($ psm)`,
+           subgroup = `Planning Region`,
+           subgroup2 = `Planning Area`)) + 
+  geom_treemap() +
+  geom_treemap_subgroup2_border(colour = "gray40",
+                                size = 2) +
+  geom_treemap_subgroup_border(colour = "gray20")
+```
+:::
+
+## 4. Designing Interactive Treemap using *d3treeR*
+
+### 4.1 Getting started
+
+```{r}
+library(devtools)
+install_github("timelyportfolio/d3treeR")
+library(d3treeR)
+```
+
+### 4.2 Designing An Interactive Treemap
+
+`treemap()` is used to build a treemap by using selected variables in condominium data.frame. The treemap created is save as object called tm.
+
+```{r}
+#| code-fold: true
+
+
+tm <- treemap(realis2018_summarised,
+        index=c("Planning Region", "Planning Area"),
+        vSize="Total Unit Sold",
+        vColor="Median Unit Price ($ psm)",
+        type="value",
+        title="Private Residential Property Sold, 2017",
+        title.legend = "Median Unit Price (S$ per sq. m)"
+        )
+```
+
+Then `d3tree()` is used to build an interactive treemap.
+
+```{r}
+d3tree(tm,rootname = "Singapore" )
+```
