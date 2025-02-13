@@ -13,9 +13,165 @@ execute:
 1. Getting Started
 
 ```{r}
-pacman::p_load(tidyverse)
+pacman::p_load(tidyverse, dplyr, ggdist, ggridges, ggthemes, gifski, gapminder, plotly, gganimate, ggiraph, ggstatsplot, colorspace, FunnelPlotR, performance, parameters, see, lubridate)
 ```
 
 ```{r}
-data <- read_csv("Ship_Performance_Dataset.csv")
+ship_data <- read_csv("Ship_Performance_Dataset.csv") %>%
+  mutate_if(is.character, as.factor)
 ```
+
+```{r}
+summary(ship_data)
+```
+
+```{r}
+str(ship_data)
+```
+
+```{r}
+attach(ship_data)
+contrasts(Ship_Type) = contr.treatment(5)
+contrasts(Route_Type) = contr.treatment(5)
+contrasts(Engine_Type) = contr.treatment(4)
+contrasts(Maintenance_Status) = contr.treatment(4)
+contrasts(Weather_Condition) = contr.treatment(4)
+
+efficiency_model <- lm(Efficiency_nm_per_kWh ~ ., data = ship_data)
+cost_model <- lm(Operational_Cost_USD ~ ., data = ship_data)
+revenue_model <-lm(Revenue_per_Voyage_USD ~., data = ship_data)
+```
+
+```{r}
+check_c <- check_collinearity(efficiency_model)
+plot(check_c)
+```
+
+```{r}
+check_c <- check_collinearity(cost_model)
+plot(check_c)
+```
+
+```{r}
+check_c <- check_collinearity(revenue_model)
+plot(check_c)
+```
+
+
+
+```{r}
+feature_labels <- c(
+  "Speed_Over_Ground_knots" = "Speed (knots)",
+  "Engine_Power_kW" = "Engine Power (kW)",
+  "Distance_Traveled_nm" = "Distance Traveled (nm)",
+  "Operational_Cost_USD" = "Operational Cost (USD)",
+  "Revenue_per_Voyage_USD" = "Revenue per Voyage (USD)",
+  "Efficiency_nm_per_kWh" = "Efficiency (nm/kWh)"
+)
+
+p <- ship_data %>%
+  pivot_longer(cols = names(feature_labels), names_to = "Feature", 
+               values_to = "Value") %>%
+  mutate(Feature = factor(Feature, levels = names(feature_labels), 
+                          labels = feature_labels)) %>%
+  ggplot(aes(x = Value, fill = Feature)) +
+  geom_histogram(bins = 30, alpha = 0.7) +
+  facet_wrap(~Feature, scales = "free") +
+  theme_minimal() +
+  labs(title = "Distribution of Numeical Features") +
+  theme(legend.position = "none",
+        strip.text = element_text(size = 12, face = "bold"))
+
+ggplotly(p) %>% layout(hovermode = "x unified")
+```
+
+```{r}
+feature_labels <- c(
+  "Ship_Type" = "Ship Type",
+  "Route_Type" = "Route Type",
+  "Engine_Type" = "Engine Type",
+  "Maintenance_Status" = "Maintenance Status",
+  "Weather_Condition" = "Weather Condition"
+)
+
+p <- ship_data %>%
+  pivot_longer(cols = names(feature_labels), names_to = "Feature", 
+               values_to = "Category") %>%
+  mutate(Feature = factor(Feature, levels = names(feature_labels), 
+                          labels = feature_labels)) %>%
+  ggplot(aes(x = Category, fill = Feature)) +
+  geom_bar(alpha = 0.7) +
+  facet_wrap(~Feature, scales = "free") +
+  theme_minimal() +
+  labs(title = "Distribution of Categorical Features") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none",
+        strip.text = element_text(size = 12, face = "bold"))
+
+ggplotly(p) %>% layout(hovermode = "x")
+```
+
+```{r}
+mean_revenue <- ship_data %>%
+  group_by(Route_Type) %>%
+  summarize(mean = mean(Revenue_per_Voyage_USD))
+
+p <- ggplot(ship_data, 
+            aes(x = Route_Type, y = Revenue_per_Voyage_USD, 
+                fill = Route_Type)) +
+  geom_boxplot(alpha = 0.7) +
+  stat_summary(geom = "point", fun = "mean", colour ="red", size=3,
+               aes(text = paste("mean:", round(..y.., 2)))) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "Revenue per Voyage by Route Type",
+       x = "Route Type",
+       y = "Revenue per Voyage (USD)") +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 30, hjust = 1, size = 10, 
+                                   face = "bold"),
+        plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
+
+ggplotly(p, tooltip = "text") %>% layout(hovermode = "x unified")
+```
+
+
+```{r}
+monthly_summary <- ship_data %>%
+  mutate(Month = floor_date(as.Date(Date), "month")) %>%
+  group_by(Ship_Type, Month) %>%
+  summarize(
+    Avg_Efficiency = mean(Efficiency_nm_per_kWh),
+    Total_Revenue = sum(Revenue_per_Voyage_USD),
+    Total_Cost = sum(Operational_Cost_USD),
+    Total_Distance = sum(Distance_Traveled_nm)
+  ) %>%
+  arrange(Ship_Type, Month)
+```
+
+
+```{r}
+p <- ggplot(monthly_summary, 
+            aes(x = Avg_Efficiency, y = Total_Cost, color = Ship_Type)) +
+  geom_point(alpha = 0.7) +
+  theme_minimal() +
+  labs(title = "Trade-off Between Fuel Efficiency and Operational Cost",
+       x = "Efficiency (nm/kWh)",
+       y = "Operational Cost (USD)")
+
+ggplotly(p) %>% layout(hovermode = "closest")
+```
+
+```{r}
+ggplot(ship_data, aes(x = Distance_Traveled_nm, y = Revenue_per_Voyage_USD / Distance_Traveled_nm, color = Ship_Type)) +
+  geom_point(alpha = 0.7) +
+  geom_smooth(se = FALSE, method = "loess") +
+  theme_minimal() +
+  labs(title = "Revenue Efficiency per Nautical Mile",
+       x = "Distance Traveled (nm)",
+       y = "Revenue per Nautical Mile (USD)")
+```
+
+
+
+
