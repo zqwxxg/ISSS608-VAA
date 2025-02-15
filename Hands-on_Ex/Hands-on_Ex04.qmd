@@ -4,9 +4,10 @@ author: "Wong Zi Qi"
 execute:
   warning: false
   message: false
+  freeze: true
 ---
 
-# ***Visualizing Distribution***
+# *Visualizing Distribution*
 
 ## 1. Getting started
 
@@ -220,7 +221,7 @@ ggplot(exam,
   theme_economist()
 ```
 
-# ***Visual Statistical Analysis***
+# *Visual Statistical Analysis*
 
 ## 1. Visual Statistical Analysis with ggstatsplot
 
@@ -411,7 +412,7 @@ ggcoefstats(model1,
             output = "plot")
 ```
 
-# ***Visualising Uncertainty***
+# *Visualising Uncertainty*
 
 ## 1. Getting Started
 
@@ -668,7 +669,7 @@ ggplot(data = exam,
   transition_states(.draw, 1, 3)
 ```
 
-# ***Funnel Plots for Fair Comparisons***
+# *Funnel Plots for Fair Comparisons*
 
 ## 1. Getting Started
 

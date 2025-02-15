@@ -10,10 +10,10 @@ execute:
   freeze: true
 ---
 
-1. Getting Started
+1.  Getting Started
 
 ```{r}
-pacman::p_load(tidyverse, dplyr, ggdist, ggridges, ggthemes, gifski, gapminder, plotly, gganimate, ggiraph, ggstatsplot, colorspace, FunnelPlotR, performance, parameters, see, lubridate)
+pacman::p_load(tidyverse, dplyr, ggdist, ggridges, ggthemes, gifski, gapminder, plotly, gganimate, ggiraph, ggstatsplot, colorspace, FunnelPlotR, performance, parameters, see, lubridate, cluster)
 ```
 
 ```{r}
@@ -24,21 +24,35 @@ ship_data <- read_csv("Ship_Performance_Dataset.csv") %>%
 ```{r}
 summary(ship_data)
 ```
+```{r}
+attach(ship_data)
+
+ship_data <- ship_data %>% filter(Weather_Condition != "None", 
+                                  Ship_Type != "None",
+                                  Engine_Type != "None",
+                                  Maintenance_Status != "None",
+                                  Route_Type != "None")
+```
 
 ```{r}
 str(ship_data)
 ```
 
 ```{r}
-attach(ship_data)
-contrasts(Ship_Type) = contr.treatment(5)
-contrasts(Route_Type) = contr.treatment(5)
-contrasts(Engine_Type) = contr.treatment(4)
-contrasts(Maintenance_Status) = contr.treatment(4)
-contrasts(Weather_Condition) = contr.treatment(4)
+# contrasts(Ship_Type) = contr.treatment(5)
+# contrasts(Route_Type) = contr.treatment(5)
+# contrasts(Engine_Type) = contr.treatment(4)
+# contrasts(Maintenance_Status) = contr.treatment(4)
+# contrasts(Weather_Condition) = contr.treatment(4)
 
-efficiency_model <- lm(Efficiency_nm_per_kWh ~ ., data = ship_data)
-cost_model <- lm(Operational_Cost_USD ~ ., data = ship_data)
+efficiency_model <- lm(Efficiency_nm_per_kWh ~ Speed_Over_Ground_knots + 
+                         Engine_Power_kW + Distance_Traveled_nm + 
+                         Revenue_per_Voyage_USD + Operational_Cost_USD, 
+                       data = ship_data)
+cost_model <- lm(Operational_Cost_USD ~ Speed_Over_Ground_knots + 
+                   Engine_Power_kW + Distance_Traveled_nm + 
+                   Revenue_per_Voyage_USD + Efficiency_nm_per_kWh, 
+                 data = ship_data)
 revenue_model <-lm(Revenue_per_Voyage_USD ~., data = ship_data)
 ```
 
@@ -56,8 +70,6 @@ plot(check_c)
 check_c <- check_collinearity(revenue_model)
 plot(check_c)
 ```
-
-
 
 ```{r}
 feature_labels <- c(
@@ -111,6 +123,8 @@ p <- ship_data %>%
 ggplotly(p) %>% layout(hovermode = "x")
 ```
 
+Which route type generates the highest revenue?
+
 ```{r}
 mean_revenue <- ship_data %>%
   group_by(Route_Type) %>%
@@ -135,35 +149,38 @@ p <- ggplot(ship_data,
 ggplotly(p, tooltip = "text") %>% layout(hovermode = "x unified")
 ```
 
+Group by ship type
 
 ```{r}
-monthly_summary <- ship_data %>%
-  mutate(Month = floor_date(as.Date(Date), "month")) %>%
-  group_by(Ship_Type, Month) %>%
+daily_summary_by_ship <- ship_data %>%
+  mutate(Date = floor_date(as.Date(Date), "day")) %>%
+  group_by(Ship_Type, Date) %>%
   summarize(
-    Avg_Efficiency = mean(Efficiency_nm_per_kWh),
-    Total_Revenue = sum(Revenue_per_Voyage_USD),
-    Total_Cost = sum(Operational_Cost_USD),
-    Total_Distance = sum(Distance_Traveled_nm)
+    Avg_Efficiency = mean(Efficiency_nm_per_kWh, na.rm = TRUE),
+    Total_Revenue = sum(Revenue_per_Voyage_USD, na.rm = TRUE),
+    Total_Cost = sum(Operational_Cost_USD, na.rm = TRUE),
+    Total_Distance = sum(Distance_Traveled_nm, na.rm = TRUE)
   ) %>%
-  arrange(Ship_Type, Month)
+  ungroup()
 ```
 
-
 ```{r}
-p <- ggplot(monthly_summary, 
-            aes(x = Avg_Efficiency, y = Total_Cost, color = Ship_Type)) +
+p <- ggplot(daily_summary_by_ship, 
+            aes(x = Total_Cost, y = Avg_Efficiency, color = Ship_Type)) +
   geom_point(alpha = 0.7) +
   theme_minimal() +
   labs(title = "Trade-off Between Fuel Efficiency and Operational Cost",
-       x = "Efficiency (nm/kWh)",
-       y = "Operational Cost (USD)")
+       x = "Operational Cost (USD)",
+       y = "Efficiency (nm/kWh)")
 
 ggplotly(p) %>% layout(hovermode = "closest")
 ```
 
+
 ```{r}
-ggplot(ship_data, aes(x = Distance_Traveled_nm, y = Revenue_per_Voyage_USD / Distance_Traveled_nm, color = Ship_Type)) +
+ggplot(daily_summary_by_ship, 
+       aes(x = Total_Distance, y = Total_Revenue / Total_Distance, 
+           color = Ship_Type)) +
   geom_point(alpha = 0.7) +
   geom_smooth(se = FALSE, method = "loess") +
   theme_minimal() +
@@ -171,6 +188,177 @@ ggplot(ship_data, aes(x = Distance_Traveled_nm, y = Revenue_per_Voyage_USD / Dis
        x = "Distance Traveled (nm)",
        y = "Revenue per Nautical Mile (USD)")
 ```
+
+```{r}
+ggplot(ship_data, aes(x = Maintenance_Status, y = Efficiency_nm_per_kWh, fill = Maintenance_Status)) +
+  geom_violin(alpha = 0.7) +
+  geom_boxplot(width = 0.1, outlier.shape = NA) +
+  theme_minimal() +
+  labs(title = "Fuel Efficiency vs Maintenance Condition",
+       x = "Maintenance Status",
+       y = "Efficiency (nm/kWh)")
+```
+
+```{r}
+# Select relevant numerical features
+ship_scaled <- ship_data %>%
+  select(Speed_Over_Ground_knots, Engine_Power_kW, Distance_Traveled_nm, 
+         Operational_Cost_USD, Revenue_per_Voyage_USD, Efficiency_nm_per_kWh) %>%
+  scale()
+
+# Determine optimal clusters using Elbow Method
+wss <- sapply(1:10, function(k) kmeans(ship_scaled, k, nstart = 10)$tot.withinss)
+plot(1:10, wss, type = "b", pch = 19, frame = FALSE, 
+     xlab = "Number of Clusters", ylab = "Within-cluster Sum of Squares")
+
+# Apply K-Means Clustering
+set.seed(123)
+kmeans_result <- kmeans(ship_scaled, centers = 3, nstart = 10)
+
+# Add cluster labels to dataset
+ship_data$Cluster <- as.factor(kmeans_result$cluster)
+
+# Visualize clusters
+ggplot(ship_data, aes(x = Efficiency_nm_per_kWh, y = Operational_Cost_USD, color = Cluster)) +
+  geom_point(alpha = 0.7) +
+  theme_minimal() +
+  labs(title = "K-Means Clustering: Ship Performance Segmentation",
+       x = "Fuel Efficiency (nm/kWh)",
+       y = "Operational Cost (USD)")
+```
+
+```{r}
+summary(cost_model)
+```
+```{r}
+# Plot actual vs predicted costs
+ship_data$Predicted_Cost <- predict(cost_model, ship_data)
+
+ggplot(ship_data, aes(x = Operational_Cost_USD, y = Predicted_Cost)) +
+  geom_point(alpha = 0.7, color = "blue") +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
+  theme_minimal() +
+  labs(title = "Predicted vs. Actual Operational Costs",
+       x = "Actual Cost (USD)",
+       y = "Predicted Cost (USD)")
+```
+
+```{r}
+ship_data %>%
+  pivot_longer(cols = c(Speed_Over_Ground_knots, Engine_Power_kW,
+                        Distance_Traveled_nm, Operational_Cost_USD,
+                        Revenue_per_Voyage_USD, Efficiency_nm_per_kWh),
+               names_to = "Feature", values_to = "Value") %>%
+  ggplot(aes(x = Value, fill = Feature)) +
+  geom_density(alpha = 0.5) +
+  geom_rug(alpha = 0.3) +
+  facet_wrap(~Feature, scales = "free") +
+  theme_minimal() +
+  labs(title = "Density & Rug Plot of Key Numerical Features") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "none")
+```
+```{r}
+ggbetweenstats(data = ship_data, 
+               x = Ship_Type, 
+               y = Operational_Cost_USD, 
+               type = "np",
+               mean.ci = TRUE) +
+  theme_minimal() +
+  labs(title = "Operational Cost Distribution Across Ship Types")
+```
+
+```{r}
+ggplot(ship_data, aes(x = Weather_Condition, y = Efficiency_nm_per_kWh, 
+                      fill = Weather_Condition)) +
+  geom_boxplot(alpha = 0.5, width = .20,
+               outlier.shape = NA) +
+  stat_halfeye(adjust = 0.5, justification = -0.2,
+               .width = 0, alpha = 0.7,
+               point_colour = NA) +
+  theme_minimal() +
+  labs(title = "Fuel Efficiency vs Weather Conditions") + 
+  theme(legend.position = "none")
+```
+
+```{r}
+daily_summary_by_route <- ship_data %>%
+  mutate(Date = floor_date(as.Date(Date), "day")) %>%
+  group_by(Route_Type, Date) %>%
+  summarize(
+    Avg_Efficiency = mean(Efficiency_nm_per_kWh, na.rm = TRUE),
+    Total_Revenue = sum(Revenue_per_Voyage_USD, na.rm = TRUE),
+    Total_Cost = sum(Operational_Cost_USD, na.rm = TRUE),
+    Total_Distance = sum(Distance_Traveled_nm, na.rm = TRUE)
+  ) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(daily_summary_by_route, aes(x = Total_Distance, 
+                       y = Total_Revenue, 
+                       size = Total_Cost, 
+                       color = Route_Type)) +
+  geom_point(alpha = 0.7) +
+  theme_minimal() +
+  labs(title = "Trade-Off: Distance vs Revenue vs Cost",
+       x = "Distance Traveled (nm)",
+       y = "Revenue per Voyage (USD)",
+       size = "Operational Cost (USD)")
+```
+
+```{r}
+daily_summary_by_ship <- ship_data %>%
+  mutate(Date = floor_date(as.Date(Date), "day")) %>%
+  group_by(Ship_Type, Date) %>%
+  summarize(
+    Avg_Efficiency = mean(Efficiency_nm_per_kWh, na.rm = TRUE),
+    Total_Revenue = sum(Revenue_per_Voyage_USD, na.rm = TRUE),
+    Total_Cost = sum(Operational_Cost_USD, na.rm = TRUE),
+    Total_Distance = sum(Distance_Traveled_nm, na.rm = TRUE)
+  ) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(ship_data, aes(x = Distance_Traveled_nm, 
+                       y = Efficiency_nm_per_kWh, 
+                       color = Ship_Type)) +
+  geom_line() +
+  transition_reveal(Distance_Traveled_nm) +
+  theme_minimal() +
+  labs(title = "Efficiency Trends Over Distance Traveled",
+       x = "Distance Traveled (nm)",
+       y = "Efficiency (nm/kWh)")
+```
+
+```{r}
+p <- daily_summary_by_ship %>%
+  plot_ly(
+    x = ~Total_Distance,
+    y = ~Avg_Efficiency,
+    size = ~Total_Revenue,  # Bubble size
+    color = ~Ship_Type,  # Different ship types will have different colors
+    sizes = c(2, 100),  # Adjust size range
+    frame = ~Date,  # Animate by date
+    text = ~paste("Ship Type:", Ship_Type, "<br>",
+                  "Avg Efficiency:", round(Avg_Efficiency, 2), "<br>",
+                  "Total Revenue: $", round(Total_Revenue, 2), "<br>",
+                  "Total Distance:", round(Total_Distance, 2), "nm"),
+    hoverinfo = "text",
+    type = 'scatter',
+    mode = 'markers'
+  ) %>%
+  layout(
+    title = "Daily Summary by Ship Type",
+    xaxis = list(title = "Total Distance Traveled (nm)"),
+    yaxis = list(title = "Average Efficiency (nm per kWh)"),
+    showlegend = TRUE
+  )
+
+p
+```
+
 
 
 

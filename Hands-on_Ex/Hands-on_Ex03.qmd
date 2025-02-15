@@ -4,9 +4,10 @@ author: "Wong Zi Qi"
 execute:
   warning: false
   message: false
+  freeze: true
 ---
 
-# ***Programming Interactive Data Visualisation with R***
+# *Programming Interactive Data Visualisation with R*
 
 ## 1. Getting Started
 
@@ -383,7 +384,7 @@ crosstalk::bscols(gg,
 -   `bscols()` is a helper function of crosstalk package. It makes it easy to put HTML elements side by side. It can be called directly from the console but is especially designed to work in an R Markdown document. Warning: This will bring in all of Bootstrap!.
 :::
 
-# ***Programming Animated Statistical Graphics with R***
+# *Programming Animated Statistical Graphics with R*
 
 ## 1. Getting Started
 

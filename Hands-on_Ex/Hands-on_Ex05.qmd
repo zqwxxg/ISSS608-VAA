@@ -4,9 +4,10 @@ author: "Wong Zi Qi"
 execute:
   warning: false
   message: false
+  freeze: true
 ---
 
-# ***Creating Ternary Plot***
+# *Creating Ternary Plot*
 
 ## 1. Getting Started
 
@@ -101,7 +102,7 @@ plot_ly(
   )
 ```
 
-# ***Visual Correlation Analysis***
+# *Visual Correlation Analysis*
 
 ## 1. Getting Started
 
@@ -324,7 +325,7 @@ corrplot(wine.cor,
          addrect = 3)
 ```
 
-# ***Heatmap for Visualising and Analysing Multivariate Data***
+# *Heatmap for Visualising and Analysing Multivariate Data*
 
 ## 1. Getting Started
 
@@ -507,7 +508,7 @@ heatmaply(normalize(wh_matrix[, -c(1, 2, 4, 5)]),
           )
 ```
 
-# ***Visual Multivariate Analysis with Parallel Coordinates Plot***
+# *Visual Multivariate Analysis with Parallel Coordinates Plot*
 
 ## 1. Getting Started
 
@@ -634,7 +635,7 @@ parallelPlot(wh,
              histoVisibility = histoVisibility)
 ```
 
-# ***Treemap Visualisation***
+# *Treemap Visualisation*
 
 ## 1. Data Wrangling
 
