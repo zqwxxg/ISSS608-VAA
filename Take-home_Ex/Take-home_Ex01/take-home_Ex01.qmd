@@ -101,19 +101,19 @@ ship_data %>% ExpNumViz(target = NULL,
                         Page = c(2,3))
 ```
 
-**Symmetric Distributions & Low Skewness**: 
+**Symmetric Distributions & Low Skewness**:
 
 Most variables have skewness values close to zero, meaning the distributions are well-balanced without significant left or right skew. The negative kurtosis value (\~ -1.2) suggests a distribution that is flat than normal, indicating that data points are spread out.
 
-**Trends**: 
+**Trends**:
 
 There is no clear noticeable trend. `Cargo Weight` and `Operational Cost`, and `Average Load Percentage` exhibit somewhat multimodal distributions, hinting at distinct ship categories or operational clusters. The `Weekly Voyage Count` shows a non-smooth density pattern, meaning that there are possible fluctuations in voyage frequency, possibly driven by external factors such as seasonality or ship availability.
 
 # 3. Advanced Analysis
 
-## 3.1 Identifying the Top Revenue-Generating Vessels 
+## 3.1 Identifying the Top Revenue-Generating Vessels
 
-This analysis evaluates revenue per voyage across different ship types to determine which type generates the highest revenue. 
+This analysis evaluates revenue per voyage across different ship types to determine which type generates the highest revenue.
 
 ### Visualization
 
@@ -297,6 +297,7 @@ Medium to long-haul routes appear to strike an optimal balance between distance 
 This analysis applies a linear regression model to assess whether a ship's operational cost can be predicted based on numerical attributes. Understanding these relationships can help in cost forecasting, budget planning, and operational optimization.
 
 ### Visualization
+
 ```{r}
 cost_model <- lm(Operational_Cost_USD ~ Speed_Over_Ground_knots +
                    Engine_Power_kW + Distance_Traveled_nm + Draft_meters +
