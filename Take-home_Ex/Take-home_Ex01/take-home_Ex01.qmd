@@ -1,8 +1,8 @@
 ---
-title: "Take Home Exercise 1"
+title: "Take Home Exercise 1: Ship Performance in the Gulf of Guinea"
 author: "Wong Zi Qi"
 date: "February 1, 2025"
-date-modified: "last modified"
+date-modified: "February 16, 2025"
 execute: 
   echo: true
   eval: true
@@ -10,146 +10,189 @@ execute:
   freeze: true
 ---
 
-1.  Getting Started
+# Overview
+
+The upcoming article, will explore key operational metrics and performance trends of various ship types navigating this crucial maritime region. Utilizing the Ship Performance Dataset - a synthetic yet realistic collection of ship performance data - the article will present insights into fuel efficiency, operational costs, and performance optimization. With data visualization playing a central role, the piece will highlight patterns and predictive analytics applications. By leveraging data-driven approaches, this analysis aims to enhance decision-making in the maritime sector, supporting economic growth and sustainability while addressing environmental concerns.
+
+# 1. Getting Started
+
+## 1.1 Install packages
 
 ```{r}
-pacman::p_load(tidyverse, dplyr, ggdist, ggridges, ggthemes, gifski, gapminder, plotly, gganimate, ggiraph, ggstatsplot, colorspace, FunnelPlotR, performance, parameters, see, lubridate, cluster)
+pacman::p_load(tidyverse, ggdist, ggridges, ggthemes, colorspace, gapminder, 
+               plotly, gganimate, ggiraph, ggstatsplot, FunnelPlotR, 
+               performance, parameters, see, lubridate, cluster, SmartEDA, 
+               gtsummary)
 ```
 
+## 1.2 Import data
+
+Based on the dataset description provided on Kaggle, we can identify the key categorical variables that serve as critical indicators of ship performance:
+
+-   `Ship_Type`
+-   `Route_Type`
+-   `Engine_Type`
+-   `Maintenance_Status`
+-   `Weather_Condition`
+
+Therefore, we will convert these to factor variables to extract meaningful insights.
+
 ```{r}
+cols <- c("Ship_Type", "Route_Type", "Engine_Type", 
+          "Maintenance_Status", "Weather_Condition")
+
 ship_data <- read_csv("Ship_Performance_Dataset.csv") %>%
-  mutate_if(is.character, as.factor)
+  mutate(across(all_of(cols), as.factor))
 ```
 
-```{r}
-summary(ship_data)
-```
+## 1.3 Utilities
+
 ```{r}
 attach(ship_data)
+theme_set(theme_minimal())
+```
 
-ship_data <- ship_data %>% filter(Weather_Condition != "None", 
+# 2. Basic EDA
+
+## 2.1 Data overview
+
+The dataset consists of 2,736 observations with 18 key variables, covering a mix of numeric, categorical (factor), and date data types, all with zero missing values, ensuring a complete dataset for analysis.
+
+::: panel-tabset
+# Overview
+
+```{r}
+ship_data %>% ExpData(type = 1)
+```
+
+# Structure
+
+```{r}
+ship_data %>% ExpData(type = 2)
+```
+:::
+
+## 2.2 Distribution of categorical variables
+
+Next, we will analyze the contributing factors for each categorical variable and examine their respective distributions.
+
+```{r}
+ship_data %>% ExpCTable(Target = NULL)
+```
+
+The presence of `None` suggests that certain entries may lack recorded information for a specific feature. In this case, we classify `None` as a missing value and exclude it from the analysis.
+
+```{r}
+ship_data <- ship_data %>% filter(Weather_Condition != "None",
                                   Ship_Type != "None",
                                   Engine_Type != "None",
                                   Maintenance_Status != "None",
                                   Route_Type != "None")
 ```
 
+::: callout-note
+-   The dataset has been reduced to 2,127 observations.
+:::
+
+## 2.3 Distribution of numercial variables
+
 ```{r}
-str(ship_data)
+ship_data %>% ExpNumViz(target = NULL,
+                        Page = c(2,3))
 ```
 
-```{r}
-# contrasts(Ship_Type) = contr.treatment(5)
-# contrasts(Route_Type) = contr.treatment(5)
-# contrasts(Engine_Type) = contr.treatment(4)
-# contrasts(Maintenance_Status) = contr.treatment(4)
-# contrasts(Weather_Condition) = contr.treatment(4)
+**Symmetric Distributions & Low Skewness**: 
 
-efficiency_model <- lm(Efficiency_nm_per_kWh ~ Speed_Over_Ground_knots + 
-                         Engine_Power_kW + Distance_Traveled_nm + 
-                         Revenue_per_Voyage_USD + Operational_Cost_USD, 
-                       data = ship_data)
-cost_model <- lm(Operational_Cost_USD ~ Speed_Over_Ground_knots + 
-                   Engine_Power_kW + Distance_Traveled_nm + 
-                   Revenue_per_Voyage_USD + Efficiency_nm_per_kWh, 
-                 data = ship_data)
-revenue_model <-lm(Revenue_per_Voyage_USD ~., data = ship_data)
+Most variables have skewness values close to zero, meaning the distributions are well-balanced without significant left or right skew. The negative kurtosis value (\~ -1.2) suggests a distribution that is flat than normal, indicating that data points are spread out.
+
+**Trends**: 
+
+There is no clear noticeable trend. `Cargo Weight` and `Operational Cost`, and `Average Load Percentage` exhibit somewhat multimodal distributions, hinting at distinct ship categories or operational clusters. The `Weekly Voyage Count` shows a non-smooth density pattern, meaning that there are possible fluctuations in voyage frequency, possibly driven by external factors such as seasonality or ship availability.
+
+# 3. Advanced Analysis
+
+## 3.1 Identifying the Top Revenue-Generating Vessels 
+
+This analysis evaluates revenue per voyage across different ship types to determine which type generates the highest revenue. 
+
+### Visualization
+
+```{r}
+ggbetweenstats(data = ship_data,
+               x = Ship_Type,
+               y = Revenue_per_Voyage_USD,
+               type = "np",
+               mean.ci = TRUE) +
+  theme(legend.position = "none") +
+  labs(title = "Revenue Generation Across Ship Types")
 ```
 
-```{r}
-check_c <- check_collinearity(efficiency_model)
-plot(check_c)
-```
+### Key Insights
+
+***Revenue Consistency Across Ship Types:***
+
+The high p-value indicates no significant difference in revenue per voyage across ship types, suggesting consistent earnings despite variations in operational and structural characteristics.
+
+## 3.2 Ship Performance Across Weather Condition
+
+Weather conditions significantly impact fuel efficiency and speed. Some ship types may be more resilient due to hull design, cargo weight, or engine power. This analysis examines how different ship types perform under varying weather conditions, focusing on efficiency (nm per kWh).
+
+### Visualization
 
 ```{r}
-check_c <- check_collinearity(cost_model)
-plot(check_c)
-```
-
-```{r}
-check_c <- check_collinearity(revenue_model)
-plot(check_c)
-```
-
-```{r}
-feature_labels <- c(
-  "Speed_Over_Ground_knots" = "Speed (knots)",
-  "Engine_Power_kW" = "Engine Power (kW)",
-  "Distance_Traveled_nm" = "Distance Traveled (nm)",
-  "Operational_Cost_USD" = "Operational Cost (USD)",
-  "Revenue_per_Voyage_USD" = "Revenue per Voyage (USD)",
-  "Efficiency_nm_per_kWh" = "Efficiency (nm/kWh)"
-)
-
-p <- ship_data %>%
-  pivot_longer(cols = names(feature_labels), names_to = "Feature", 
-               values_to = "Value") %>%
-  mutate(Feature = factor(Feature, levels = names(feature_labels), 
-                          labels = feature_labels)) %>%
-  ggplot(aes(x = Value, fill = Feature)) +
-  geom_histogram(bins = 30, alpha = 0.7) +
-  facet_wrap(~Feature, scales = "free") +
-  theme_minimal() +
-  labs(title = "Distribution of Numeical Features") +
-  theme(legend.position = "none",
-        strip.text = element_text(size = 12, face = "bold"))
-
-ggplotly(p) %>% layout(hovermode = "x unified")
-```
-
-```{r}
-feature_labels <- c(
-  "Ship_Type" = "Ship Type",
-  "Route_Type" = "Route Type",
-  "Engine_Type" = "Engine Type",
-  "Maintenance_Status" = "Maintenance Status",
-  "Weather_Condition" = "Weather Condition"
-)
-
-p <- ship_data %>%
-  pivot_longer(cols = names(feature_labels), names_to = "Feature", 
-               values_to = "Category") %>%
-  mutate(Feature = factor(Feature, levels = names(feature_labels), 
-                          labels = feature_labels)) %>%
-  ggplot(aes(x = Category, fill = Feature)) +
-  geom_bar(alpha = 0.7) +
-  facet_wrap(~Feature, scales = "free") +
-  theme_minimal() +
-  labs(title = "Distribution of Categorical Features") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "none",
-        strip.text = element_text(size = 12, face = "bold"))
-
-ggplotly(p) %>% layout(hovermode = "x")
-```
-
-Which route type generates the highest revenue?
-
-```{r}
-mean_revenue <- ship_data %>%
-  group_by(Route_Type) %>%
-  summarize(mean = mean(Revenue_per_Voyage_USD))
-
-p <- ggplot(ship_data, 
-            aes(x = Route_Type, y = Revenue_per_Voyage_USD, 
-                fill = Route_Type)) +
+ggplot(ship_data, aes(x = Weather_Condition, y = Efficiency_nm_per_kWh, 
+                           fill = Ship_Type)) +
   geom_boxplot(alpha = 0.7) +
-  stat_summary(geom = "point", fun = "mean", colour ="red", size=3,
-               aes(text = paste("mean:", round(..y.., 2)))) +
-  theme_minimal() +
-  scale_fill_brewer(palette = "Set2") +
-  labs(title = "Revenue per Voyage by Route Type",
-       x = "Route Type",
-       y = "Revenue per Voyage (USD)") +
-  theme(legend.position = "none",
-        axis.text.x = element_text(angle = 30, hjust = 1, size = 10, 
-                                   face = "bold"),
-        plot.title = element_text(size = 14, face = "bold", hjust = 0.5))
-
-ggplotly(p, tooltip = "text") %>% layout(hovermode = "x unified")
+  labs(title = "How Ship Types Perform in Different Weather Conditions",
+       x = "Weather Condition",
+       y = "Efficiency (nm/kWh)",
+       fill = "Ship Type")
 ```
 
-Group by ship type
+### Key insights
+
+***Effect of Weather on Efficiency:***
+
+Efficiency remains relatively stable across ship types despite worsening weather, likely due to adaptive navigation, robust hull designs, or engine optimizations. However, rough conditions introduce greater variability, as seen in the wider interquartile ranges and extended whiskers, indicating occasional efficiency fluctuations.
+
+***Ship Resilience & Potential Factors Influencing Efficiency:***
+
+Bulk Carriers and Tankers demonstrate stable efficiency across weather conditions, reflecting resilience to adverse environments. In contrast, Container Ships experience a notable efficiency drop in unfavorable weather, suggesting a greater sensitivity to external conditions, possibly due to hull design or operational constraints. Meanwhile, Fish Carriers, however, perform less efficiently in calm conditions, potentially due to engine performance, load distribution, or operational idling.
+
+## 3.3 Impact of Maintenance Quality on Fuel Efficiency Across Ship Types
+
+This analysis examines how maintenance status affects fuel efficiency (nm/kWh) across different ship types. The goal is to determine which ships experience the greatest efficiency losses due to poor maintenance, as this directly impacts fuel consumption, operational costs, and overall performance.
+
+### Visualization
+
+```{r}
+ggplot(ship_data, aes(x = Efficiency_nm_per_kWh, 
+                      y = Ship_Type, fill = Maintenance_Status)) +
+  geom_density_ridges(alpha = 0.7) +
+  theme_minimal() +
+  labs(title = "Fuel Efficiency vs Maintenance Status Across Ship Types",
+       x = "Efficiency (nm/kWh)",
+       y = "Ship Type",
+       fill = "Maintenance Status")
+```
+
+### Key Insights
+
+***Maintenance-Efficiency Relationship:***
+
+Ships are predominantly in Good condition (blue). As maintenance deteriorates to Fair (green), fuel efficiency declines, indicating potential performance losses due to mechanical wear or increased resistance. A notable insight is that ships in Critical condition (red) still exhibit high fuel efficiency, suggesting that these vessels may be operating under specific conditions, such as carrying lighter loads, undergoing urgent voyages, or employing short-term operational adjustments to compensate for mechanical inefficiencies.
+
+***Ship Types Most Affected by Poor Maintenance:***
+
+Bulk carriers and container ships experience the most significant efficiency losses as maintenance quality declines, likely due to their large size and high fuel consumption demands. In contrast, fish carriers and tankers exhibit a more gradual reduction in efficiency, suggesting greater resilience to maintenance fluctuations, potentially due to differences in operational design and load capacity.
+
+## 3.4 Identifying the Most Cost-Effective Ship Types
+
+This analysis examines the trade-off between fuel efficiency and operational costs across different ship types. The objective is to identify which ship types achieve the best balance between maximizing fuel efficiency and minimizing operational expenses, enabling cost-effective fleet management and operational decision-making.
+
+### Visualization
+
+A daily summary for each ship type is computed to aggregate data, thereby enhancing visualization clarity and interpretability.
 
 ```{r}
 daily_summary_by_ship <- ship_data %>%
@@ -157,6 +200,7 @@ daily_summary_by_ship <- ship_data %>%
   group_by(Ship_Type, Date) %>%
   summarize(
     Avg_Efficiency = mean(Efficiency_nm_per_kWh, na.rm = TRUE),
+    Total_Engine = sum(Engine_Power_kW, na.rm = TRUE),
     Total_Revenue = sum(Revenue_per_Voyage_USD, na.rm = TRUE),
     Total_Cost = sum(Operational_Cost_USD, na.rm = TRUE),
     Total_Distance = sum(Distance_Traveled_nm, na.rm = TRUE)
@@ -165,7 +209,7 @@ daily_summary_by_ship <- ship_data %>%
 ```
 
 ```{r}
-p <- ggplot(daily_summary_by_ship, 
+p <- ggplot(daily_summary_by_ship,
             aes(x = Total_Cost, y = Avg_Efficiency, color = Ship_Type)) +
   geom_point(alpha = 0.7) +
   theme_minimal() +
@@ -176,110 +220,23 @@ p <- ggplot(daily_summary_by_ship,
 ggplotly(p) %>% layout(hovermode = "closest")
 ```
 
+### Key Insights
 
-```{r}
-ggplot(daily_summary_by_ship, 
-       aes(x = Total_Distance, y = Total_Revenue / Total_Distance, 
-           color = Ship_Type)) +
-  geom_point(alpha = 0.7) +
-  geom_smooth(se = FALSE, method = "loess") +
-  theme_minimal() +
-  labs(title = "Revenue Efficiency per Nautical Mile",
-       x = "Distance Traveled (nm)",
-       y = "Revenue per Nautical Mile (USD)")
-```
+***Lack of a Clear Linear Relationship:***
 
-```{r}
-ggplot(ship_data, aes(x = Maintenance_Status, y = Efficiency_nm_per_kWh, fill = Maintenance_Status)) +
-  geom_violin(alpha = 0.7) +
-  geom_boxplot(width = 0.1, outlier.shape = NA) +
-  theme_minimal() +
-  labs(title = "Fuel Efficiency vs Maintenance Condition",
-       x = "Maintenance Status",
-       y = "Efficiency (nm/kWh)")
-```
+The scatter plot reveals no strong correlation between operational costs and fuel efficiency, indicating that higher expenditures do not necessarily result in better efficiency. Notably, some ships with lower operational costs achieve comparable or even superior fuel efficiency compared to higher-cost vessels.
 
-```{r}
-# Select relevant numerical features
-ship_scaled <- ship_data %>%
-  select(Speed_Over_Ground_knots, Engine_Power_kW, Distance_Traveled_nm, 
-         Operational_Cost_USD, Revenue_per_Voyage_USD, Efficiency_nm_per_kWh) %>%
-  scale()
+***Optimization Opportunities:***
 
-# Determine optimal clusters using Elbow Method
-wss <- sapply(1:10, function(k) kmeans(ship_scaled, k, nstart = 10)$tot.withinss)
-plot(1:10, wss, type = "b", pch = 19, frame = FALSE, 
-     xlab = "Number of Clusters", ylab = "Within-cluster Sum of Squares")
+Certain tanker operations incur higher costs without significantly improving fuel efficiency, highlighting potential areas for cost reduction strategies. Conversely, some bulk carrier operations demonstrate low-cost, high-efficiency performance, suggesting good resource allocation optimization.
 
-# Apply K-Means Clustering
-set.seed(123)
-kmeans_result <- kmeans(ship_scaled, centers = 3, nstart = 10)
+## 3.5 Route Optimization for Maximum Revenue
 
-# Add cluster labels to dataset
-ship_data$Cluster <- as.factor(kmeans_result$cluster)
+This analysis examines the relationship between distance traveled and revenue per voyage across different route categories. Understanding which routes yield the best revenue enables optimized fleet allocation and cost-effective route planning. Focusing on high-yield routes while balancing operational costs ensures sustainable profitability in maritime logistics.
 
-# Visualize clusters
-ggplot(ship_data, aes(x = Efficiency_nm_per_kWh, y = Operational_Cost_USD, color = Cluster)) +
-  geom_point(alpha = 0.7) +
-  theme_minimal() +
-  labs(title = "K-Means Clustering: Ship Performance Segmentation",
-       x = "Fuel Efficiency (nm/kWh)",
-       y = "Operational Cost (USD)")
-```
+### Visualization
 
-```{r}
-summary(cost_model)
-```
-```{r}
-# Plot actual vs predicted costs
-ship_data$Predicted_Cost <- predict(cost_model, ship_data)
-
-ggplot(ship_data, aes(x = Operational_Cost_USD, y = Predicted_Cost)) +
-  geom_point(alpha = 0.7, color = "blue") +
-  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +
-  theme_minimal() +
-  labs(title = "Predicted vs. Actual Operational Costs",
-       x = "Actual Cost (USD)",
-       y = "Predicted Cost (USD)")
-```
-
-```{r}
-ship_data %>%
-  pivot_longer(cols = c(Speed_Over_Ground_knots, Engine_Power_kW,
-                        Distance_Traveled_nm, Operational_Cost_USD,
-                        Revenue_per_Voyage_USD, Efficiency_nm_per_kWh),
-               names_to = "Feature", values_to = "Value") %>%
-  ggplot(aes(x = Value, fill = Feature)) +
-  geom_density(alpha = 0.5) +
-  geom_rug(alpha = 0.3) +
-  facet_wrap(~Feature, scales = "free") +
-  theme_minimal() +
-  labs(title = "Density & Rug Plot of Key Numerical Features") + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        legend.position = "none")
-```
-```{r}
-ggbetweenstats(data = ship_data, 
-               x = Ship_Type, 
-               y = Operational_Cost_USD, 
-               type = "np",
-               mean.ci = TRUE) +
-  theme_minimal() +
-  labs(title = "Operational Cost Distribution Across Ship Types")
-```
-
-```{r}
-ggplot(ship_data, aes(x = Weather_Condition, y = Efficiency_nm_per_kWh, 
-                      fill = Weather_Condition)) +
-  geom_boxplot(alpha = 0.5, width = .20,
-               outlier.shape = NA) +
-  stat_halfeye(adjust = 0.5, justification = -0.2,
-               .width = 0, alpha = 0.7,
-               point_colour = NA) +
-  theme_minimal() +
-  labs(title = "Fuel Efficiency vs Weather Conditions") + 
-  theme(legend.position = "none")
-```
+A daily summary for each route is computed to aggregate data, thereby enhancing visualization clarity and interpretability.
 
 ```{r}
 daily_summary_by_route <- ship_data %>%
@@ -295,71 +252,76 @@ daily_summary_by_route <- ship_data %>%
 ```
 
 ```{r}
-ggplot(daily_summary_by_route, aes(x = Total_Distance, 
-                       y = Total_Revenue, 
-                       size = Total_Cost, 
-                       color = Route_Type)) +
+p <- ggplot(daily_summary_by_route, aes(
+    x = Total_Distance,
+    y = Total_Revenue,
+    size = Total_Cost,
+    color = Route_Type,
+    text = paste(
+      "Route Type:", Route_Type, "<br>",
+      "Total Distance:", round(Total_Distance, 2), "nm", "<br>",
+      "Total Revenue: $", format(Total_Revenue, big.mark = ","), "<br>",
+      "Total Cost: $", format(Total_Cost, big.mark = ",")
+    )
+  )) +
   geom_point(alpha = 0.7) +
-  theme_minimal() +
-  labs(title = "Trade-Off: Distance vs Revenue vs Cost",
-       x = "Distance Traveled (nm)",
-       y = "Revenue per Voyage (USD)",
-       size = "Operational Cost (USD)")
-```
-
-```{r}
-daily_summary_by_ship <- ship_data %>%
-  mutate(Date = floor_date(as.Date(Date), "day")) %>%
-  group_by(Ship_Type, Date) %>%
-  summarize(
-    Avg_Efficiency = mean(Efficiency_nm_per_kWh, na.rm = TRUE),
-    Total_Revenue = sum(Revenue_per_Voyage_USD, na.rm = TRUE),
-    Total_Cost = sum(Operational_Cost_USD, na.rm = TRUE),
-    Total_Distance = sum(Distance_Traveled_nm, na.rm = TRUE)
-  ) %>%
-  ungroup()
-```
-
-```{r}
-ggplot(ship_data, aes(x = Distance_Traveled_nm, 
-                       y = Efficiency_nm_per_kWh, 
-                       color = Ship_Type)) +
-  geom_line() +
-  transition_reveal(Distance_Traveled_nm) +
-  theme_minimal() +
-  labs(title = "Efficiency Trends Over Distance Traveled",
-       x = "Distance Traveled (nm)",
-       y = "Efficiency (nm/kWh)")
-```
-
-```{r}
-p <- daily_summary_by_ship %>%
-  plot_ly(
-    x = ~Total_Distance,
-    y = ~Avg_Efficiency,
-    size = ~Total_Revenue,  # Bubble size
-    color = ~Ship_Type,  # Different ship types will have different colors
-    sizes = c(2, 100),  # Adjust size range
-    frame = ~Date,  # Animate by date
-    text = ~paste("Ship Type:", Ship_Type, "<br>",
-                  "Avg Efficiency:", round(Avg_Efficiency, 2), "<br>",
-                  "Total Revenue: $", round(Total_Revenue, 2), "<br>",
-                  "Total Distance:", round(Total_Distance, 2), "nm"),
-    hoverinfo = "text",
-    type = 'scatter',
-    mode = 'markers'
-  ) %>%
-  layout(
-    title = "Daily Summary by Ship Type",
-    xaxis = list(title = "Total Distance Traveled (nm)"),
-    yaxis = list(title = "Average Efficiency (nm per kWh)"),
-    showlegend = TRUE
+  labs(
+    title = "Trade-Off: Distance vs Revenue vs Cost",
+    x = "Distance Traveled (nm)",
+    y = "Revenue per Voyage (USD)",
+    size = NULL,
+    color = NULL
   )
 
-p
+ggplotly(p, tooltip = "text")%>% layout(hovermode = "closest")
 ```
 
+### Key insights
 
+***Distance-Revenue Relationship:***
 
+Revenue per voyage increases with distance, with transoceanic and long-haul routes generating the highest returns, while coastal and short-haul routes yield lower revenue. This suggests that longer voyages offer greater financial returns, likely due to larger cargo volumes and higher freight rates.
 
+***Variability in Revenue Efficiency:***
 
+Some shorter routes (such as Short-haul and Coastal) show similar revenue levels as longer voyages, suggesting that certain regional or high-demand routes may be particularly profitable. Transoceanic routes have the highest revenue variance, suggesting that profitability is influenced by multiple factors such as cargo type, fuel costs, and market demand fluctuations.
+
+***Optimizing Fleet Utilization:***
+
+Medium to long-haul routes appear to strike an optimal balance between distance and revenue, making them ideal for fleet efficiency. While revenue increases with distance, operational costs remain relatively stable, suggesting that cost management is effectively maintained across various voyage lengths.
+
+# 4. Predictive Models
+
+## 4.1 Predicting Operational Costs Using Regression
+
+This analysis applies a linear regression model to assess whether a ship's operational cost can be predicted based on numerical attributes. Understanding these relationships can help in cost forecasting, budget planning, and operational optimization.
+
+### Visualization
+```{r}
+cost_model <- lm(Operational_Cost_USD ~ Speed_Over_Ground_knots +
+                   Engine_Power_kW + Distance_Traveled_nm + Draft_meters +
+                   Cargo_Weight_tons + Revenue_per_Voyage_USD + 
+                   Turnaround_Time_hours + Efficiency_nm_per_kWh + 
+                   Seasonal_Impact_Score + Weekly_Voyage_Count + 
+                   Average_Load_Percentage,
+                 data = ship_data)
+```
+
+```{r}
+ggcoefstats(cost_model, output = "plot")
+```
+
+### Key Insights
+
+***Limited Predictive Power of Variables:***
+
+Most predictors have p-values above 0.05, indicating weak statistical significance and suggesting they do not strongly influence operational costs in this model.
+
+***Potentially Influential Factors:***
+
+Cargo Weight (p = 0.08) and Speed Over Ground (p = 0.08) show marginal significance, implying they may have some impact on operational costs.
+
+***Strategic Implications:***
+
+-   Enhancing the model with additional factors such as fuel price fluctuations, maintenance records, and crew costs may improve predictive accuracy.
+-   A non-linear or interaction-based approach may be more suitable for cost forecasting in the maritime industry than a simple linear regression model.
