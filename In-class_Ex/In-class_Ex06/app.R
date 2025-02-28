@@ -7,10 +7,9 @@
 #    https://shiny.posit.co/
 #
 
-library(shiny)
-library(tidyverse)
+pacman::p_load(shiny, tidyverse)
 
-exam <- read.csv("../../data/Exam_data.csv")
+exam <- read.csv("Exam_data.csv")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
