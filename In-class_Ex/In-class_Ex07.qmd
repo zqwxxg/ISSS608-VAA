@@ -1,0 +1,241 @@
+---
+title: "In-class Exercise 7"
+author: "Wong Zi Qi"
+execute:
+  warning: false
+  message: false
+  freeze: true
+---
+
+# 1. Installing packages
+```{r}
+pacman::p_load(tidyverse, tsibble, feasts, fable, seasonal)
+```
+
+# 2. Importing data
+
+```{r}
+ts_data <- read.csv("../data/visitor_arrivals_by_air.csv")
+```
+
+# 3. Preparing data
+
+```{r}
+ts_data$`Month.Year` <- dmy(
+  ts_data$`Month.Year`)
+```
+
+# 4. Conventional base `ts` object vs `tibble` object
+
+::: panel-tabset
+
+# ts
+```{r}
+ts_data_ts <- ts(ts_data)
+head(ts_data_ts)
+```
+
+# tibble
+```{r}
+ts_tsibble <- ts_data %>%
+  mutate(Month = yearmonth(`Month.Year`)) %>%
+  as_tsibble(index = `Month`)
+
+ts_tsibble
+```
+:::
+
+# 5. Visualizing time-series data
+
+```{r}
+ts_longer <- ts_data %>%
+  pivot_longer(cols = c(2:34),
+               names_to = "Country",
+               values_to = "Arrivals")
+```
+
+## 5.1 Plotting single time-series
+
+```{r}
+ts_longer %>%
+  filter(Country == "Vietnam") %>%
+  ggplot(aes(x = `Month.Year`, 
+             y = Arrivals))+
+  geom_line(size = 0.5)
+```
+
+## 5.2 Plotting multiple time-series
+
+```{r}
+#| fig-height: 12
+
+
+ggplot(data = ts_longer, 
+       aes(x = `Month.Year`, 
+           y = Arrivals))+
+  geom_line(size = 0.5) +
+  facet_wrap(~ Country,
+             ncol = 3,
+             scales = "free_y") +
+  theme_bw()
+```
+
+## 5.3 Visualizing seasonality with Cycle Plot
+
+```{r}
+tsibble_longer <- ts_tsibble %>%
+  pivot_longer(cols = c(2:34),
+               names_to = "Country",
+               values_to = "Arrivals")
+```
+
+```{r}
+#| fig-height: 6
+
+
+tsibble_longer %>%
+  filter(Country == "Vietnam" |
+         Country == "Italy") %>% 
+  gg_subseries(Arrivals)
+```
+
+# 6. Time series decomposition
+
+## 6.1 Single time series decomposition
+
+::: {.panel-tabset group="single-dec"}
+
+# ACF
+```{r}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam") %>%
+  ACF(Arrivals) %>% 
+  autoplot()
+```
+
+# PACF
+```{r}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam") %>%
+  PACF(Arrivals) %>% 
+  autoplot()
+```
+:::
+
+
+## 6.2 Multiple time series decompoisition
+
+::: {.panel-tabset group="multiple-dec"}
+
+# ACF
+```{r}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam" |
+         `Country` == "Italy" |
+         `Country` == "United Kingdom" |
+         `Country` == "China") %>%
+  ACF(Arrivals) %>%
+  autoplot()
+```
+
+# PACF
+```{r}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam" |
+         `Country` == "Italy" |
+         `Country` == "United Kingdom" |
+         `Country` == "China") %>%
+  PACF(Arrivals) %>%
+  autoplot()
+```
+
+:::
+
+# 7. Visual STL diagnostics with feasts
+
+```{r}
+tsibble_longer %>%
+  filter(`Country` == "Vietnam") %>%
+  model(stl = STL(Arrivals)) %>%
+  components() %>%
+  autoplot()
+```
+
+# 8. Visual Forecasting
+
+## 8.1 Time Series Data Sampling
+
+```{r}
+vietnam_ts <- tsibble_longer %>%
+  filter(Country == "Vietnam") %>% 
+  mutate(Type = if_else(
+    `Month.Year` >= "2019-01-01", 
+    "Hold-out", "Training"))
+```
+
+```{r}
+vietnam_train <- vietnam_ts %>%
+  filter(`Month.Year` < "2019-01-01")
+```
+
+## 8.2 Exploratory Data Analysis (EDA): Time Series Data
+
+```{r}
+vietnam_train %>%
+  model(stl = STL(Arrivals)) %>%
+  components() %>%
+  autoplot()
+```
+
+## 8.3 Fitting forecasting models
+
+### Fitting a simple exponential smoothing (SES)
+
+```{r}
+fit_ses <- vietnam_train %>%
+  model(ETS(Arrivals ~ error("A") 
+            + trend("N") 
+            + season("N")))
+fit_ses
+```
+
+### Examine Model Assumptions
+
+```{r}
+gg_tsresiduals(fit_ses)
+```
+
+## 8.4 Fitting multiple ETS Models
+
+```{r}
+fit_ETS <- vietnam_train %>%
+  model(`SES` = ETS(Arrivals ~ error("A") + 
+                      trend("N") + 
+                      season("N")),
+        `Holt`= ETS(Arrivals ~ error("A") +
+                      trend("A") +
+                      season("N")),
+        `damped Holt` = 
+          ETS(Arrivals ~ error("A") +
+                trend("Ad") + 
+                season("N")),
+        `WH_A` = ETS(
+          Arrivals ~ error("A") + 
+            trend("A") + 
+            season("A")),
+        `WH_M` = ETS(Arrivals ~ error("M") 
+                         + trend("A") 
+                         + season("M"))
+  )
+```
+
+## 8.5 Forecasting future values
+
+```{r}
+fit_ETS %>%
+  forecast(h = "12 months") %>%
+  autoplot(vietnam_ts, 
+           level = NULL)
+```
+
+
