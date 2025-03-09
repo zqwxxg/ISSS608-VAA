@@ -8,6 +8,7 @@ execute:
 ---
 
 # 1. Installing packages
+
 ```{r}
 pacman::p_load(tidyverse, tsibble, feasts, fable, seasonal)
 ```
@@ -28,14 +29,15 @@ ts_data$`Month.Year` <- dmy(
 # 4. Conventional base `ts` object vs `tibble` object
 
 ::: panel-tabset
-
 # ts
+
 ```{r}
 ts_data_ts <- ts(ts_data)
 head(ts_data_ts)
 ```
 
 # tibble
+
 ```{r}
 ts_tsibble <- ts_data %>%
   mutate(Month = yearmonth(`Month.Year`)) %>%
@@ -104,8 +106,8 @@ tsibble_longer %>%
 ## 6.1 Single time series decomposition
 
 ::: {.panel-tabset group="single-dec"}
-
 # ACF
+
 ```{r}
 tsibble_longer %>%
   filter(`Country` == "Vietnam") %>%
@@ -114,6 +116,7 @@ tsibble_longer %>%
 ```
 
 # PACF
+
 ```{r}
 tsibble_longer %>%
   filter(`Country` == "Vietnam") %>%
@@ -122,12 +125,11 @@ tsibble_longer %>%
 ```
 :::
 
-
 ## 6.2 Multiple time series decompoisition
 
 ::: {.panel-tabset group="multiple-dec"}
-
 # ACF
+
 ```{r}
 tsibble_longer %>%
   filter(`Country` == "Vietnam" |
@@ -139,6 +141,7 @@ tsibble_longer %>%
 ```
 
 # PACF
+
 ```{r}
 tsibble_longer %>%
   filter(`Country` == "Vietnam" |
@@ -148,7 +151,6 @@ tsibble_longer %>%
   PACF(Arrivals) %>%
   autoplot()
 ```
-
 :::
 
 # 7. Visual STL diagnostics with feasts
@@ -237,5 +239,47 @@ fit_ETS %>%
   autoplot(vietnam_ts, 
            level = NULL)
 ```
+
+## 8.6 Fitting multiple models
+
+```{r}
+ASEAN <- tsibble_longer %>%
+  filter(Country == "Vietnam" |
+         Country == "Malaysia" |
+         Country == "Indonesia" |
+         Country == "Thailand" |
+         Country == "Philippines")
+
+ASEAN_train <- ASEAN %>%
+  mutate(Type = if_else(
+    `Month.Year` >= "2019-01-01", 
+    "Hold-out", "Training")) %>%
+  filter(Type == "Training")
+```
+
+```{r}
+ASEAN_fit <- ASEAN_train %>%
+  model(
+    ets = ETS(Arrivals),
+    arima = ARIMA(Arrivals)
+  )
+```
+
+```{r}
+ASEAN_fit %>%
+  accuracy() %>%
+  arrange(Country)
+```
+
+```{r}
+ASEAN_fc <- ASEAN_fit %>%
+  forecast(h = "12 months")
+```
+
+```{r}
+ASEAN_fc %>%
+  autoplot(ASEAN)
+```
+
 
 
