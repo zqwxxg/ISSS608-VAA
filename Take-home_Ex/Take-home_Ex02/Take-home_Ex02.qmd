@@ -1,5 +1,5 @@
 ---
-title: "Take-home Exercise 2"
+title: "Take-home Exercise 2: Be Tradewise or Otherwise"
 author: "Wong Zi Qi"
 date: "March 6, 2025"
 date-modified: "March 9, 2025"
