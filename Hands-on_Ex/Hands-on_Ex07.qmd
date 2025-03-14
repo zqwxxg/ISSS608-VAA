@@ -1,5 +1,5 @@
 ---
-title: "Hands-on Exercise 7"
+title: "Hands-on Exercise 7: Visualising and Analysing Time-oriented Data"
 author: "Wong Zi Qi"
 execute:
   warning: false
@@ -7,29 +7,27 @@ execute:
   freeze: true
 ---
 
-# *Visualising and Analysing Time-oriented Data*
-
-## 1. Getting Started
+# 1. Getting Started
 
 ```{r}
 pacman::p_load(scales, viridis, lubridate, ggthemes, gridExtra, readxl, knitr, data.table, CGPfunctions, ggHoriPlot, tidyverse)
 ```
 
-## 2. Plotting Calendar Heatmap
+# 2. Plotting Calendar Heatmap
 
-### 2.1 Importing data
+## 2.1 Importing data
 
 ```{r}
 attacks <- read_csv("../data/eventlog.csv")
 ```
 
-### 2.2 Examining the data structure
+## 2.2 Examining the data structure
 
 ```{r}
 kable(head(attacks))
 ```
 
-### 2.3 Data Preparation
+## 2.3 Data Preparation
 
 Step 1: Deriving weekday and hour of day fields.
 
@@ -64,13 +62,14 @@ attacks <- attacks %>%
     hour  = factor(
       hour, levels = 0:23))
 ```
+
 After processing gives:
 
 ```{r}
 kable(head(attacks))
 ```
 
-### 2.4 Building the Calendar Heatmaps.
+## 2.4 Building the Calendar Heatmaps.
 
 ```{r}
 #| code-fold: true
@@ -101,7 +100,7 @@ theme(axis.ticks = element_blank(),
       legend.text = element_text(size = 6) )
 ```
 
-### 2.5 Building Multiple Calendar Heatmaps
+## 2.5 Building Multiple Calendar Heatmaps
 
 Step 1: Deriving attack by country object.
 
@@ -152,15 +151,15 @@ ggplot(top4_attacks,
         legend.text = element_text(size = 6) )
 ```
 
-## 3. Plotting Cycle Plot
+# 3. Plotting Cycle Plot
 
-### 3.1 Importing data
+## 3.1 Importing data
 
 ```{r}
 air <- read_excel("../data/arrivals_by_air.xlsx")
 ```
 
-### 3.2 Data preparation
+## 3.2 Data preparation
 
 Step 1: Deriving month and year fields.
 
@@ -190,7 +189,7 @@ hline.data <- Vietnam %>%
   summarise(avgvalue = mean(`Vietnam`))
 ```
 
-### 3.3 Building the cycle plot
+## 3.3 Building the cycle plot
 
 ```{r}
 #| code-fold: true
@@ -215,15 +214,15 @@ ggplot() +
   theme_tufte(base_family = "Helvetica")
 ```
 
-## 4. Plotting Slopegraph
+# 4. Plotting Slopegraph
 
-### 4.1 Importing data
+## 4.1 Importing data
 
 ```{r}
 rice <- read_csv("../data/rice.csv")
 ```
 
-### 4.2 Building the slopegraph
+## 4.2 Building the slopegraph
 
 ```{r}
 #| code-fold: true
@@ -237,4 +236,3 @@ rice %>%
                 SubTitle = "1961-1980",
                 Caption = "Prepared by: Dr. Kam Tin Seong")
 ```
-
