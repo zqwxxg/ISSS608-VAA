@@ -152,7 +152,7 @@ tm_shape(mpsz_pop2020)+
 
 :::
 
-## 3.3 Data classification methods of tmap
+### 3.3 Data classification methods of tmap
 
 #### Plotting choropleth maps with built-in classification methods
 
@@ -197,7 +197,7 @@ tm_shape(mpsz_pop2020)+
   tm_borders(alpha = 0.5)
 ```
 
-## 3.4 Colour Scheme
+### 3.4 Colour Scheme
 
 #### Using ColourBrewer palette
 
@@ -295,7 +295,7 @@ To reset the default style:
 tmap_style("white")
 ```
 
-## 3.6 Drawing Small Multiple Choropleth Maps
+### 3.6 Drawing Small Multiple Choropleth Maps
 
 Small multiple maps, also referred to as facet maps, are composed of many maps arrange side-by-side, and sometimes stacked vertically. Small multiple maps enable the visualisation of how spatial relationships change with respect to another variable, such as time.
 
