@@ -305,6 +305,8 @@ g + facet_edges(~Weekday) +
 ## 5.2 Working with *facet_nodes()*
 
 ```{r}
+#| code-fold: true
+
 set_graph_style()
 
 g <- ggraph(GAStech_graph, 
