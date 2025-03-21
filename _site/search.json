@@ -91,88 +91,158 @@
     "text": "Name: Wong Zi QiStudent ID: 01499468Email: ziqi.wong.2023@mitb.smu.edu.sg"
   },
   {
-    "objectID": "In-class_Ex/In-class_Ex07.html",
-    "href": "In-class_Ex/In-class_Ex07.html",
-    "title": "In-class Exercise 7",
+    "objectID": "In-class_Ex/In-class_Ex05.html",
+    "href": "In-class_Ex/In-class_Ex05.html",
+    "title": "In-class Exercise 5",
     "section": "",
-    "text": "pacman::p_load(tidyverse, tsibble, feasts, fable, seasonal)"
+    "text": "pacman::p_load(tidyverse, readxl, SmartEDA, easystats, gtsummary, ggstatsplot)\n\n\ncar_resale &lt;- read_xls(\"../data/ToyotaCorolla.xls\", \"data\")"
   },
   {
-    "objectID": "In-class_Ex/In-class_Ex07.html#plotting-single-time-series",
-    "href": "In-class_Ex/In-class_Ex07.html#plotting-single-time-series",
-    "title": "In-class Exercise 7",
-    "section": "5.1 Plotting single time-series",
-    "text": "5.1 Plotting single time-series\n\nts_longer %&gt;%\n  filter(Country == \"Vietnam\") %&gt;%\n  ggplot(aes(x = `Month.Year`, \n             y = Arrivals))+\n  geom_line(size = 0.5)"
-  },
-  {
-    "objectID": "In-class_Ex/In-class_Ex07.html#plotting-multiple-time-series",
-    "href": "In-class_Ex/In-class_Ex07.html#plotting-multiple-time-series",
-    "title": "In-class Exercise 7",
-    "section": "5.2 Plotting multiple time-series",
-    "text": "5.2 Plotting multiple time-series\n\nggplot(data = ts_longer, \n       aes(x = `Month.Year`, \n           y = Arrivals))+\n  geom_line(size = 0.5) +\n  facet_wrap(~ Country,\n             ncol = 3,\n             scales = \"free_y\") +\n  theme_bw()"
-  },
-  {
-    "objectID": "In-class_Ex/In-class_Ex07.html#visualizing-seasonality-with-cycle-plot",
-    "href": "In-class_Ex/In-class_Ex07.html#visualizing-seasonality-with-cycle-plot",
-    "title": "In-class Exercise 7",
-    "section": "5.3 Visualizing seasonality with Cycle Plot",
-    "text": "5.3 Visualizing seasonality with Cycle Plot\n\ntsibble_longer &lt;- ts_tsibble %&gt;%\n  pivot_longer(cols = c(2:34),\n               names_to = \"Country\",\n               values_to = \"Arrivals\")\n\n\ntsibble_longer %&gt;%\n  filter(Country == \"Vietnam\" |\n         Country == \"Italy\") %&gt;% \n  gg_subseries(Arrivals)"
-  },
-  {
-    "objectID": "In-class_Ex/In-class_Ex07.html#single-time-series-decomposition",
-    "href": "In-class_Ex/In-class_Ex07.html#single-time-series-decomposition",
-    "title": "In-class Exercise 7",
-    "section": "6.1 Single time series decomposition",
-    "text": "6.1 Single time series decomposition\n\nACFPACF\n\n\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\") %&gt;%\n  ACF(Arrivals) %&gt;% \n  autoplot()\n\n\n\n\n\n\n\n\n\n\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\") %&gt;%\n  PACF(Arrivals) %&gt;% \n  autoplot()"
-  },
-  {
-    "objectID": "In-class_Ex/In-class_Ex07.html#multiple-time-series-decompoisition",
-    "href": "In-class_Ex/In-class_Ex07.html#multiple-time-series-decompoisition",
-    "title": "In-class Exercise 7",
-    "section": "6.2 Multiple time series decompoisition",
-    "text": "6.2 Multiple time series decompoisition\n\nACFPACF\n\n\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\" |\n         `Country` == \"Italy\" |\n         `Country` == \"United Kingdom\" |\n         `Country` == \"China\") %&gt;%\n  ACF(Arrivals) %&gt;%\n  autoplot()\n\n\n\n\n\n\n\n\n\n\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\" |\n         `Country` == \"Italy\" |\n         `Country` == \"United Kingdom\" |\n         `Country` == \"China\") %&gt;%\n  PACF(Arrivals) %&gt;%\n  autoplot()"
-  },
-  {
-    "objectID": "In-class_Ex/In-class_Ex07.html#time-series-data-sampling",
-    "href": "In-class_Ex/In-class_Ex07.html#time-series-data-sampling",
-    "title": "In-class Exercise 7",
-    "section": "8.1 Time Series Data Sampling",
-    "text": "8.1 Time Series Data Sampling\n\nvietnam_ts &lt;- tsibble_longer %&gt;%\n  filter(Country == \"Vietnam\") %&gt;% \n  mutate(Type = if_else(\n    `Month.Year` &gt;= \"2019-01-01\", \n    \"Hold-out\", \"Training\"))\n\n\nvietnam_train &lt;- vietnam_ts %&gt;%\n  filter(`Month.Year` &lt; \"2019-01-01\")"
-  },
-  {
-    "objectID": "In-class_Ex/In-class_Ex07.html#exploratory-data-analysis-eda-time-series-data",
-    "href": "In-class_Ex/In-class_Ex07.html#exploratory-data-analysis-eda-time-series-data",
-    "title": "In-class Exercise 7",
-    "section": "8.2 Exploratory Data Analysis (EDA): Time Series Data",
-    "text": "8.2 Exploratory Data Analysis (EDA): Time Series Data\n\nvietnam_train %&gt;%\n  model(stl = STL(Arrivals)) %&gt;%\n  components() %&gt;%\n  autoplot()"
-  },
-  {
-    "objectID": "In-class_Ex/In-class_Ex07.html#fitting-forecasting-models",
-    "href": "In-class_Ex/In-class_Ex07.html#fitting-forecasting-models",
-    "title": "In-class Exercise 7",
-    "section": "8.3 Fitting forecasting models",
-    "text": "8.3 Fitting forecasting models\n\nFitting a simple exponential smoothing (SES)\n\nfit_ses &lt;- vietnam_train %&gt;%\n  model(ETS(Arrivals ~ error(\"A\") \n            + trend(\"N\") \n            + season(\"N\")))\nfit_ses\n\n# A mable: 1 x 2\n# Key:     Country [1]\n  Country `ETS(Arrivals ~ error(\"A\") + trend(\"N\") + season(\"N\"))`\n  &lt;chr&gt;                                                   &lt;model&gt;\n1 Vietnam                                            &lt;ETS(A,N,N)&gt;\n\n\n\n\nExamine Model Assumptions\n\ngg_tsresiduals(fit_ses)"
-  },
-  {
-    "objectID": "In-class_Ex/In-class_Ex07.html#fitting-multiple-ets-models",
-    "href": "In-class_Ex/In-class_Ex07.html#fitting-multiple-ets-models",
-    "title": "In-class Exercise 7",
-    "section": "8.4 Fitting multiple ETS Models",
-    "text": "8.4 Fitting multiple ETS Models\n\nfit_ETS &lt;- vietnam_train %&gt;%\n  model(`SES` = ETS(Arrivals ~ error(\"A\") + \n                      trend(\"N\") + \n                      season(\"N\")),\n        `Holt`= ETS(Arrivals ~ error(\"A\") +\n                      trend(\"A\") +\n                      season(\"N\")),\n        `damped Holt` = \n          ETS(Arrivals ~ error(\"A\") +\n                trend(\"Ad\") + \n                season(\"N\")),\n        `WH_A` = ETS(\n          Arrivals ~ error(\"A\") + \n            trend(\"A\") + \n            season(\"A\")),\n        `WH_M` = ETS(Arrivals ~ error(\"M\") \n                         + trend(\"A\") \n                         + season(\"M\"))\n  )"
-  },
-  {
-    "objectID": "In-class_Ex/In-class_Ex07.html#forecasting-future-values",
-    "href": "In-class_Ex/In-class_Ex07.html#forecasting-future-values",
-    "title": "In-class Exercise 7",
-    "section": "8.5 Forecasting future values",
-    "text": "8.5 Forecasting future values\n\nfit_ETS %&gt;%\n  forecast(h = \"12 months\") %&gt;%\n  autoplot(vietnam_ts, \n           level = NULL)"
-  },
-  {
-    "objectID": "In-class_Ex/In-class_Ex04.html",
-    "href": "In-class_Ex/In-class_Ex04.html",
-    "title": "In-class Exercise 4",
+    "objectID": "In-class_Ex/In-class_Ex05.html#getting-started",
+    "href": "In-class_Ex/In-class_Ex05.html#getting-started",
+    "title": "In-class Exercise 5",
     "section": "",
-    "text": "1. Getting Started\n\npacman::p_load(haven, SmartEDA, tidyverse, tidymodels, ggridges, ggthemes, colorspace, ggstatsplot, ggdist)\n\n\nexam_data &lt;- read_csv(\"../data/Exam_data.csv\")\n\n\n\n2. Plotting\n\nggplot(data = exam_data, aes(x = ENGLISH,y = CLASS)) +\n  geom_boxplot()\n\n\n\n\n\n\n\n\n\nggplot(exam_data, \n       aes(x = ENGLISH, \n           y = CLASS)) +\n  geom_density_ridges(\n    scale = 3,\n    rel_min_height = 0.01,\n    bandwidth = 3.4,\n    fill = lighten(\"#7097BB\", .3),\n    color = \"white\"\n  ) +\n  scale_x_continuous(\n    name = \"English grades\",\n    expand = c(0, 0)\n    ) +\n  scale_y_discrete(name = NULL, expand = expansion(add = c(0.2, 2.6))) +\n  theme_ridges()\n\n\n\n\n\n\n\n\n\nggplot(exam_data,\n       aes(x = RACE,\n           y = ENGLISH)) +\n  stat_halfeye(adjust = 0.5,\n               justification = -0.2,\n               .width = 0,\n               point_colout = NA) +\n  geom_boxplot(width = .20,\n               outlier.shape = NA) +\n  stat_dots(side = \"left\",\n            justification = 1.2,\n            binwidth = .5,\n            dotsize = 2)\n\n\n\n\n\n\n\n\n\nggbetweenstats(\n  data = exam_data,\n  x = GENDER,\n  y = MATHS,\n  type = \"np\", # non-parametric\n  messages = FALSE\n)"
+    "text": "pacman::p_load(tidyverse, readxl, SmartEDA, easystats, gtsummary, ggstatsplot)\n\n\ncar_resale &lt;- read_xls(\"../data/ToyotaCorolla.xls\", \"data\")"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex05.html#data-overview",
+    "href": "In-class_Ex/In-class_Ex05.html#data-overview",
+    "title": "In-class Exercise 5",
+    "section": "2. Data Overview",
+    "text": "2. Data Overview\n\ncar_resale %&gt;% ExpData(type = 1)\n\n                                          Descriptions     Value\n1                                   Sample size (nrow)      1436\n2                              No. of variables (ncol)        38\n3                    No. of numeric/interger variables        33\n4                              No. of factor variables         0\n5                                No. of text variables         5\n6                             No. of logical variables         0\n7                          No. of identifier variables         1\n8                                No. of date variables         0\n9             No. of zero variance variables (uniform)         1\n10               %. of variables having complete cases 100% (38)\n11   %. of variables having &gt;0% and &lt;50% missing cases    0% (0)\n12 %. of variables having &gt;=50% and &lt;90% missing cases    0% (0)\n13          %. of variables having &gt;=90% missing cases    0% (0)\n\n\n\ncar_resale %&gt;% ExpData(type = 2)\n\n   Index    Variable_Name Variable_Type Sample_n Missing_Count Per_of_Missing\n1      1               Id       numeric     1436             0              0\n2      2            Model     character     1436             0              0\n3      3            Price       numeric     1436             0              0\n4      4        Age_08_04       numeric     1436             0              0\n5      5        Mfg_Month       numeric     1436             0              0\n6      6         Mfg_Year       numeric     1436             0              0\n7      7               KM       numeric     1436             0              0\n8      8    Quarterly_Tax       numeric     1436             0              0\n9      9           Weight       numeric     1436             0              0\n10    10 Guarantee_Period       numeric     1436             0              0\n11    11           HP_Bin     character     1436             0              0\n12    12           CC_bin     character     1436             0              0\n13    13            Doors       numeric     1436             0              0\n14    14            Gears       numeric     1436             0              0\n15    15        Cylinders       numeric     1436             0              0\n16    16        Fuel_Type     character     1436             0              0\n17    17            Color     character     1436             0              0\n18    18        Met_Color       numeric     1436             0              0\n19    19        Automatic       numeric     1436             0              0\n20    20    Mfr_Guarantee       numeric     1436             0              0\n21    21  BOVAG_Guarantee       numeric     1436             0              0\n22    22              ABS       numeric     1436             0              0\n23    23         Airbag_1       numeric     1436             0              0\n24    24         Airbag_2       numeric     1436             0              0\n25    25            Airco       numeric     1436             0              0\n26    26  Automatic_airco       numeric     1436             0              0\n27    27    Boardcomputer       numeric     1436             0              0\n28    28        CD_Player       numeric     1436             0              0\n29    29     Central_Lock       numeric     1436             0              0\n30    30  Powered_Windows       numeric     1436             0              0\n31    31   Power_Steering       numeric     1436             0              0\n32    32            Radio       numeric     1436             0              0\n33    33        Mistlamps       numeric     1436             0              0\n34    34      Sport_Model       numeric     1436             0              0\n35    35 Backseat_Divider       numeric     1436             0              0\n36    36     Metallic_Rim       numeric     1436             0              0\n37    37   Radio_cassette       numeric     1436             0              0\n38    38          Tow_Bar       numeric     1436             0              0\n   No_of_distinct_values\n1                   1436\n2                    372\n3                    236\n4                     77\n5                     12\n6                      7\n7                   1263\n8                     13\n9                     59\n10                     9\n11                     3\n12                     3\n13                     4\n14                     4\n15                     1\n16                     3\n17                    10\n18                     2\n19                     2\n20                     2\n21                     2\n22                     2\n23                     2\n24                     2\n25                     2\n26                     2\n27                     2\n28                     2\n29                     2\n30                     2\n31                     2\n32                     2\n33                     2\n34                     2\n35                     2\n36                     2\n37                     2\n38                     2\n\n\n\ncols &lt;- c(\"Mfg_Month\", \"HP_Bin\", \"CC_bin\", \"Doors\", \"Gears\", \"Cylinders\",\n          \"Fuel_Type\", \"Color\", \"Met_Color\", \"Automatic\", \"Mfr_Guarantee\",\n          \"BOVAG_Guarantee\", \"ABS\", \"Airbag_1\", \"Airbag_2\", \"Airco\",\n          \"Automatic_airco\", \"Boardcomputer\", \"CD_Player\", \"Central_Lock\",\n          \"Powered_Windows\", \"Power_Steering\", \"Radio\", \"Mistlamps\", \"Sport_Model\",\n          \"Backseat_Divider\", \"Metallic_Rim\", \"Radio_cassette\", \"Tow_Bar\")\n\ncar_resale &lt;- read_xls(\"../data/ToyotaCorolla.xls\", \"data\") %&gt;%\n  mutate(Id = as.character(Id)) %&gt;%\n  mutate(across(all_of(cols), as.factor))\n\n\ncar_resale %&gt;% ExpNumStat(by = \"A\",\n                          gp = NULL,\n                          Qnt = seq(0,1,0.1),\n                          MesofShape = 2,\n                          Outlier = TRUE,\n                          round = 2,\n                          Nlim = 10)\n\n          Vname Group   TN nNeg nZero nPos NegInf PosInf NA_Value\n2     Age_08_04   All 1436    0     0 1436      0      0        0\n3            KM   All 1436    0     0 1436      0      0        0\n1         Price   All 1436    0     0 1436      0      0        0\n4 Quarterly_Tax   All 1436    0     0 1436      0      0        0\n5        Weight   All 1436    0     0 1436      0      0        0\n  Per_of_Missing      sum  min    max     mean  median       SD   CV      IQR\n2              0    80340    1     80    55.95    61.0    18.60 0.33    26.00\n3              0 98413761    1 243000 68533.26 63389.5 37506.45 0.55 44020.75\n1              0 15409464 4350  32500 10730.82  9900.0  3626.96 0.34  3500.00\n4              0   125108   19    283    87.12    85.0    41.13 0.47    16.00\n5              0  1540052 1000   1615  1072.46  1070.0    52.64 0.05    45.00\n  Skewness Kurtosis   0%     10%   20%   30%   40%     50%   60%     70%   80%\n2    -0.83    -0.08    1    27.0    40    49    55    61.0    65    68.0    73\n3     1.01     1.68    1 26241.5 37320 47355 56349 63389.5 72090 81094.5 94606\n1     1.70     3.72 4350  7450.0  7950  8750  8950  9900.0 10500 11250.0 12500\n4     1.99     4.28   19    69.0    69    69    69    85.0    85    85.0    85\n5     3.11    19.29 1000  1020.0  1035  1050  1050  1070.0  1075  1080.0  1105\n       90%   100%    LB.25%   UB.75% nOutliers\n2     77.0     80      5.00    109.0         7\n3 117087.5 243000 -23031.12 153051.9        49\n1  15950.0  32500   3200.00  17200.0       110\n4    185.0    283     45.00    109.0       224\n5   1130.0   1615    972.50   1152.5        66\n\n\n\ncar_resale %&gt;% ExpNumViz(target = NULL,\n                         nlim = 10,\n                         Page = c(2,2))\n\n$`0`\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ncar_resale %&gt;% ExpNumViz(target = \"Price\",\n                         nlim = 10,\n                         Page = c(2,2))\n\n$`0`"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex05.html#bar-plots-for-all-categorical-variables",
+    "href": "In-class_Ex/In-class_Ex05.html#bar-plots-for-all-categorical-variables",
+    "title": "In-class Exercise 5",
+    "section": "3. Bar plots for all categorical variables",
+    "text": "3. Bar plots for all categorical variables\n\ncar_resale%&gt;% ExpCatViz(target = NULL,\n                        col = \"Sky blue\",\n                        clim = 10,\n                        margin = 2,\n                        Page = c(4,4),\n                        sample = 16)\n\n$`0`"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex05.html#regression-model",
+    "href": "In-class_Ex/In-class_Ex05.html#regression-model",
+    "title": "In-class Exercise 5",
+    "section": "4. Regression Model",
+    "text": "4. Regression Model\n\nattach(car_resale)\n\n\nmodel &lt;- lm(Price ~ Age_08_04 + Mfg_Year + KM + Weight + Guarantee_Period,\n            data = car_resale)\n\nmodel\n\n\nCall:\nlm(formula = Price ~ Age_08_04 + Mfg_Year + KM + Weight + Guarantee_Period, \n    data = car_resale)\n\nCoefficients:\n     (Intercept)         Age_08_04          Mfg_Year                KM  \n      -2.637e+06        -1.409e+01         1.315e+03        -2.323e-02  \n          Weight  Guarantee_Period  \n       1.903e+01         2.770e+01  \n\n\n\ncheck_collinearity(model)\n\n# Check for Multicollinearity\n\nLow Correlation\n\n             Term  VIF     VIF 95% CI Increased SE Tolerance Tolerance 95% CI\n               KM 1.46 [ 1.37,  1.57]         1.21      0.68     [0.64, 0.73]\n           Weight 1.41 [ 1.32,  1.51]         1.19      0.71     [0.66, 0.76]\n Guarantee_Period 1.04 [ 1.01,  1.17]         1.02      0.97     [0.86, 0.99]\n\nHigh Correlation\n\n      Term   VIF     VIF 95% CI Increased SE Tolerance Tolerance 95% CI\n Age_08_04 31.07 [28.08, 34.38]         5.57      0.03     [0.03, 0.04]\n  Mfg_Year 31.16 [28.16, 34.48]         5.58      0.03     [0.03, 0.04]\n\n\n\ncheck_c &lt;- check_collinearity(model)\nplot(check_c)\n\n\n\n\n\n\n\n\n\nmodel1 &lt;- lm(Price ~ Age_08_04 + KM + Weight + Guarantee_Period, \n             data = car_resale)\n\n\ncheck_model(model1)\n\n\n\n\n\n\n\n\n\ntbl_regression(model1, intercept = TRUE) %&gt;%\n  add_glance_source_note(label = list(sigma ~ \"U03C3\"),\n                         include = c(r.squared, adj.r.squared, AIC, statistic,\n                                     p.value, sigma))\n\n\n\n\n  \n    \n      Characteristic\n      Beta\n      95% CI1\n      p-value\n    \n  \n  \n    (Intercept)\n-2,186\n-4,093, -278\n0.025\n    Age_08_04\n-119\n-125, -114\n&lt;0.001\n    KM\n-0.02\n-0.03, -0.02\n&lt;0.001\n    Weight\n20\n18, 21\n&lt;0.001\n    Guarantee_Period\n27\n2.1, 52\n0.034\n  \n  \n    \n      R² = 0.849; Adjusted R² = 0.848; AIC = 24,915; Statistic = 2,005; p-value = &lt;0.001; U03C3 = 1,413\n    \n  \n  \n    \n      1 CI = Confidence Interval\n    \n  \n\n\n\n\n\np_model &lt;- parameters(model1)\n\n\nplot(parameters(model1))\n\n\n\n\n\n\n\n\n\nggcoefstats(model1, output = \"plot\")"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "",
+    "text": "pacman::p_load(igraph, tidygraph, ggraph, \n               visNetwork, lubridate, clock,\n               tidyverse, graphlayouts)\n\n\nGAStech_nodes &lt;- read_csv(\"../data/GAStech_email_node.csv\")\nGAStech_edges &lt;- read_csv(\"../data/GAStech_email_edge-v2.csv\")\n\n\nglimpse(GAStech_edges)\n\nRows: 9,063\nColumns: 8\n$ source      &lt;dbl&gt; 43, 43, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 26, 26, 26…\n$ target      &lt;dbl&gt; 41, 40, 51, 52, 53, 45, 44, 46, 48, 49, 47, 54, 27, 28, 29…\n$ SentDate    &lt;chr&gt; \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\"…\n$ SentTime    &lt;time&gt; 08:39:00, 08:39:00, 08:58:00, 08:58:00, 08:58:00, 08:58:0…\n$ Subject     &lt;chr&gt; \"GT-SeismicProcessorPro Bug Report\", \"GT-SeismicProcessorP…\n$ MainSubject &lt;chr&gt; \"Work related\", \"Work related\", \"Work related\", \"Work rela…\n$ sourceLabel &lt;chr&gt; \"Sven.Flecha\", \"Sven.Flecha\", \"Kanon.Herrero\", \"Kanon.Herr…\n$ targetLabel &lt;chr&gt; \"Isak.Baza\", \"Lucas.Alcazar\", \"Felix.Resumir\", \"Hideki.Coc…"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#wrangling-time",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#wrangling-time",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "2.1 Wrangling time",
+    "text": "2.1 Wrangling time\n\nboth dmy() and wday() are functions of lubridate package.\ndmy() transforms the SentDate to Date data type.\nwday() returns the day of the week as a decimal number or an ordered factor if label is TRUE. The argument abbr is FALSE keep the daya spells in full, i.e. Monday. The function will create a new column in the data.frame i.e. Weekday and the output of wday() will save in this newly created field.\nthe values in the Weekday field are in ordinal scale.\n\n\nGAStech_edges &lt;- GAStech_edges %&gt;%\n  mutate(SendDate = dmy(SentDate)) %&gt;%\n  mutate(Weekday = wday(SentDate,\n                        label = TRUE,\n                        abbr = FALSE))\n\n\nglimpse(GAStech_edges)\n\nRows: 9,063\nColumns: 10\n$ source      &lt;dbl&gt; 43, 43, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 26, 26, 26…\n$ target      &lt;dbl&gt; 41, 40, 51, 52, 53, 45, 44, 46, 48, 49, 47, 54, 27, 28, 29…\n$ SentDate    &lt;chr&gt; \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\", \"6/1/2014\"…\n$ SentTime    &lt;time&gt; 08:39:00, 08:39:00, 08:58:00, 08:58:00, 08:58:00, 08:58:0…\n$ Subject     &lt;chr&gt; \"GT-SeismicProcessorPro Bug Report\", \"GT-SeismicProcessorP…\n$ MainSubject &lt;chr&gt; \"Work related\", \"Work related\", \"Work related\", \"Work rela…\n$ sourceLabel &lt;chr&gt; \"Sven.Flecha\", \"Sven.Flecha\", \"Kanon.Herrero\", \"Kanon.Herr…\n$ targetLabel &lt;chr&gt; \"Isak.Baza\", \"Lucas.Alcazar\", \"Felix.Resumir\", \"Hideki.Coc…\n$ SendDate    &lt;date&gt; 2014-01-06, 2014-01-06, 2014-01-06, 2014-01-06, 2014-01-0…\n$ Weekday     &lt;ord&gt; Friday, Friday, Friday, Friday, Friday, Friday, Friday, Fr…"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#wrangling-attributes",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#wrangling-attributes",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "2.2 Wrangling attributes",
+    "text": "2.2 Wrangling attributes\nA close examination of GAStech_edges data.frame reveals that it consists of individual e-mail flow records. This is not very useful for visualisation. In view of this, we will aggregate the individual by date, senders, receivers, main subject and day of the week.\n\nGAStech_edges_aggregated &lt;- GAStech_edges %&gt;%\n  filter(MainSubject == \"Work related\") %&gt;%\n  group_by(source, target, Weekday) %&gt;%\n    summarise(Weight = n()) %&gt;%\n  filter(source!=target) %&gt;%\n  filter(Weight &gt; 1) %&gt;%\n  ungroup()\n\n\nglimpse(GAStech_edges_aggregated)\n\nRows: 1,372\nColumns: 4\n$ source  &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,…\n$ target  &lt;dbl&gt; 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6,…\n$ Weekday &lt;ord&gt; Sunday, Monday, Tuesday, Wednesday, Friday, Sunday, Monday, Tu…\n$ Weight  &lt;int&gt; 5, 2, 3, 4, 6, 5, 2, 3, 4, 6, 5, 2, 3, 4, 6, 5, 2, 3, 4, 6, 5,…"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#the-tbl_graph-object",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#the-tbl_graph-object",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "3.1 The tbl_graph object",
+    "text": "3.1 The tbl_graph object\nTwo functions of tidygraph package can be used to create network objects, they are:\n\ntbl_graph() creates a tbl_graph network object from nodes and edges data.\nas_tbl_graph() converts network data and objects to a tbl_graph network. Below are network data and objects supported by as_tbl_graph()\n\na node data.frame and an edge data.frame,\ndata.frame, list, matrix from base,\nigraph from igraph,\nnetwork from network,\ndendrogram and hclust from stats,\nNode from data.tree,\nphylo and evonet from ape, and\ngraphNEL, graphAM, graphBAM from graph (in Bioconductor)."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#the-dplyr-verbs-in-tidygraph",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#the-dplyr-verbs-in-tidygraph",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "3.2 The dplyr verbs in tidygraph",
+    "text": "3.2 The dplyr verbs in tidygraph\n\nactivate() verb from tidygraph serves as a switch between tibbles for nodes and edges. All dplyr verbs applied to tbl_graph object are applied to the active tibble.\nN() function is used to gain access to the node data while manipulating the edge data. Similarly .E() will give you the edge data and .G() will give you the tbl_graph object itself."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#using-tbl_graph-to-build-tidygraph-data-model",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#using-tbl_graph-to-build-tidygraph-data-model",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "3.3 Using tbl_graph() to build tidygraph data model",
+    "text": "3.3 Using tbl_graph() to build tidygraph data model\n\nGAStech_graph &lt;- tbl_graph(nodes = GAStech_nodes,\n                           edges = GAStech_edges_aggregated, \n                           directed = TRUE)\n\n\nGAStech_graph\n\n# A tbl_graph: 54 nodes and 1372 edges\n#\n# A directed multigraph with 1 component\n#\n# Node Data: 54 × 4 (active)\n      id label               Department     Title                               \n   &lt;dbl&gt; &lt;chr&gt;               &lt;chr&gt;          &lt;chr&gt;                               \n 1     1 Mat.Bramar          Administration Assistant to CEO                    \n 2     2 Anda.Ribera         Administration Assistant to CFO                    \n 3     3 Rachel.Pantanal     Administration Assistant to CIO                    \n 4     4 Linda.Lagos         Administration Assistant to COO                    \n 5     5 Ruscella.Mies.Haber Administration Assistant to Engineering Group Mana…\n 6     6 Carla.Forluniau     Administration Assistant to IT Group Manager       \n 7     7 Cornelia.Lais       Administration Assistant to Security Group Manager \n 8    44 Kanon.Herrero       Security       Badging Office                      \n 9    45 Varja.Lagos         Security       Badging Office                      \n10    46 Stenig.Fusil        Security       Building Control                    \n# ℹ 44 more rows\n#\n# Edge Data: 1,372 × 4\n   from    to Weekday Weight\n  &lt;int&gt; &lt;int&gt; &lt;ord&gt;    &lt;int&gt;\n1     1     2 Sunday       5\n2     1     2 Monday       2\n3     1     2 Tuesday      3\n# ℹ 1,369 more rows\n\n\n\n\n\n\n\n\nNote\n\n\n\n\nThe output above reveals that GAStech_graph is a tbl_graph object with 54 nodes and 4541 edges.\nThe command also prints the first six rows of “Node Data” and the first three of “Edge Data”.\nIt states that the Node Data is active. The notion of an active tibble within a tbl_graph object makes it possible to manipulate the data in one tibble at a time."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#changing-the-active-object",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#changing-the-active-object",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "3.4 Changing the active object",
+    "text": "3.4 Changing the active object\nThe nodes tibble data frame is activated by default, but you can change which tibble data frame is active with the activate() function. Thus, if we wanted to rearrange the rows in the edges tibble to list those with the highest “weight” first, we could use activate() and then arrange().\n\nGAStech_graph %&gt;%\n  activate(edges) %&gt;%\n  arrange(desc(Weight))\n\n# A tbl_graph: 54 nodes and 1372 edges\n#\n# A directed multigraph with 1 component\n#\n# Edge Data: 1,372 × 4 (active)\n    from    to Weekday   Weight\n   &lt;int&gt; &lt;int&gt; &lt;ord&gt;      &lt;int&gt;\n 1    40    41 Saturday      13\n 2    41    43 Monday        11\n 3    35    31 Tuesday       10\n 4    40    41 Monday        10\n 5    40    43 Monday        10\n 6    36    32 Sunday         9\n 7    40    43 Saturday       9\n 8    41    40 Monday         9\n 9    19    15 Wednesday      8\n10    35    38 Tuesday        8\n# ℹ 1,362 more rows\n#\n# Node Data: 54 × 4\n     id label           Department     Title           \n  &lt;dbl&gt; &lt;chr&gt;           &lt;chr&gt;          &lt;chr&gt;           \n1     1 Mat.Bramar      Administration Assistant to CEO\n2     2 Anda.Ribera     Administration Assistant to CFO\n3     3 Rachel.Pantanal Administration Assistant to CIO\n# ℹ 51 more rows"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#plotting-network-graph",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#plotting-network-graph",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "4.1 Plotting network graph",
+    "text": "4.1 Plotting network graph\n\nBasicThemingColoring\n\n\n\nggraph(GAStech_graph) + geom_edge_link() + geom_node_point()\n\n\n\n\n\n\n\n\n\nThe basic plotting function is ggraph(), which takes the data to be used for the graph and the type of layout desired. Both of the arguments for ggraph() are built around igraph. Therefore, ggraph() can use either an igraph object or a tbl_graph object.\n\n\n\n\ng &lt;- ggraph(GAStech_graph) + \n  geom_edge_link(aes()) +\n  geom_node_point(aes())\n\ng + theme_graph()\n\n\n\n\n\n\n\n\n\nggraph introduces a special ggplot theme that provides better defaults for network graphs than the normal ggplot defaults. theme_graph(), besides removing axes, grids, and border, changes the font to Arial Narrow (this can be overridden).\nThe ggraph theme can be set for a series of plots with the set_graph_style() command run before the graphs are plotted or by using theme_graph() in the individual plots.\n\n\n\n\ng &lt;- ggraph(GAStech_graph) + \n  geom_edge_link(aes(colour = 'grey50')) +\n  geom_node_point(aes(colour = 'grey40'))\n\ng + theme_graph(background = 'grey10',\n                text_colour = 'white')"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#working-with-ggraphs-layouts",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#working-with-ggraphs-layouts",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "4.2 Working with ggraph’s layouts",
+    "text": "4.2 Working with ggraph’s layouts\nggraph support many layout for standard used, they are: star, circle, nicely (default), dh, gem, graphopt, grid, mds, spahere, randomly, fr, kk, drl and lgl. Figures below and on the right show layouts supported by ggraph().\n\nFruchterman and Reingold layout\n\n\nCode\ng &lt;- ggraph(GAStech_graph, \n            layout = \"fr\") +\n  geom_edge_link(aes()) +\n  geom_node_point(aes())\n\ng + theme_graph()\n\n\n\n\n\n\n\n\n\n\n\nModifying network nodes\nEach node will be colored by referring to their respective departments.\n\n\nCode\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") + \n  geom_edge_link(aes()) +\n  geom_node_point(aes(colour = Department, \n                      size = 3))\n\ng + theme_graph()\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\n\ngeom_node_point is equivalent in functionality to geo_point of ggplot2. It allows for simple plotting of nodes in different shapes, colours and sizes. In the codes chnuks above colour and size are used.\n\n\n\n\n\nModifying edges\nThe thickness of the edges will be mapped with the Weight variable.\n\n\nCode\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") +\n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department), \n                  size = 3)\n\ng + theme_graph()\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nNote\n\n\n\n\ngeom_edge_link draws edges in the simplest way - as straight lines between the start and end nodes. But, it can do more that that. In the example above, argument width is used to map the width of the line in proportional to the Weight attribute and argument alpha is used to introduce opacity on the line."
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#working-with-facet_edges",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#working-with-facet_edges",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "5.1 Working with facet_edges()",
+    "text": "5.1 Working with facet_edges()\n\nBasicThemingFramed\n\n\n\n\nCode\nset_graph_style()\n\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department), \n                  size = 2)\n\ng + facet_edges(~Weekday)\n\n\n\n\n\n\n\n\n\n\n\n\n\nCode\nset_graph_style()\n\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department), \n                  size = 2) +\n  theme(legend.position = 'bottom')\n  \ng + facet_edges(~Weekday)\n\n\n\n\n\n\n\n\n\n\n\n\n\nCode\nset_graph_style() \n\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department), \n                  size = 2)\n  \ng + facet_edges(~Weekday) +\n  th_foreground(foreground = \"grey80\",  \n                border = TRUE) +\n  theme(legend.position = 'bottom')"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#working-with-facet_nodes",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#working-with-facet_nodes",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "5.2 Working with facet_nodes()",
+    "text": "5.2 Working with facet_nodes()\n\nset_graph_style()\n\ng &lt;- ggraph(GAStech_graph, \n            layout = \"nicely\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department), \n                  size = 2)\n  \ng + facet_nodes(~Department)+\n  th_foreground(foreground = \"grey80\",  \n                border = TRUE) +\n  theme(legend.position = 'bottom')"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#computing-centrality-indices",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#computing-centrality-indices",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "6.1 Computing centrality indices",
+    "text": "6.1 Computing centrality indices\nCentrality measures are a collection of statistical indices use to describe the relative important of the actors are to a network. There are four well-known centrality measures, namely: degree, betweenness, closeness and eigenvector.\n\n\nCode\ng &lt;- GAStech_graph %&gt;%\n  mutate(betweenness_centrality = centrality_betweenness()) %&gt;%\n  ggraph(layout = \"fr\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department,\n            size=betweenness_centrality))\ng + theme_graph()"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#visualising-network-metrics",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#visualising-network-metrics",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "6.2 Visualising network metrics",
+    "text": "6.2 Visualising network metrics\nIt is important to note that from ggraph v2.0 onward tidygraph algorithms such as centrality measures can be accessed directly in ggraph calls. This means that it is no longer necessary to precompute and store derived node and edge centrality measures on the graph in order to use them in a plot.\n\n\nCode\ng &lt;- GAStech_graph %&gt;%\n  ggraph(layout = \"fr\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = Department, \n                      size = centrality_betweenness()))\ng + theme_graph()"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#visualising-community",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#visualising-community",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "6.3 Visualising Community",
+    "text": "6.3 Visualising Community\ntidygraph package inherits many of the community detection algorithms imbedded into igraph and makes them available to us, including Edge-betweenness (group_edge_betweenness), Leading eigenvector (group_leading_eigen), Fast-greedy (group_fast_greedy), Louvain (group_louvain), Walktrap (group_walktrap), Label propagation (group_label_prop), InfoMAP (group_infomap), Spinglass (group_spinglass), and Optimal (group_optimal). Some community algorithms are designed to take into account direction or weight, while others ignore it. \nIn the code chunk below group_edge_betweenness() is used.\n\n\nCode\ng &lt;- GAStech_graph %&gt;%\n  mutate(community = as.factor(group_edge_betweenness(weights = Weight, directed = TRUE))) %&gt;%\n  ggraph(layout = \"fr\") + \n  geom_edge_link(aes(width=Weight), \n                 alpha=0.2) +\n  scale_edge_width(range = c(0.1, 5)) +\n  geom_node_point(aes(colour = community))  \n\ng + theme_graph()"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#data-preparation",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#data-preparation",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "7.1 Data preparation",
+    "text": "7.1 Data preparation\n\nGAStech_edges_aggregated &lt;- GAStech_edges %&gt;%\n  left_join(GAStech_nodes, by = c(\"sourceLabel\" = \"label\")) %&gt;%\n  rename(from = id) %&gt;%\n  left_join(GAStech_nodes, by = c(\"targetLabel\" = \"label\")) %&gt;%\n  rename(to = id) %&gt;%\n  filter(MainSubject == \"Work related\") %&gt;%\n  group_by(from, to) %&gt;%\n    summarise(weight = n()) %&gt;%\n  filter(from!=to) %&gt;%\n  filter(weight &gt; 1) %&gt;%\n  ungroup()"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#plotting-the-first-interactive-network-graph",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#plotting-the-first-interactive-network-graph",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "7.2 Plotting the first interactive network graph",
+    "text": "7.2 Plotting the first interactive network graph\n\nvisNetwork(GAStech_nodes, \n           GAStech_edges_aggregated)\n\n\n\n\n\n\nWorking with layout\nIn the code chunk below, Fruchterman and Reingold layout is used.\n\n\nCode\nvisNetwork(GAStech_nodes,\n           GAStech_edges_aggregated) %&gt;%\n  visIgraphLayout(layout = \"layout_with_fr\") \n\n\n\n\n\n\n\n\nWorking with visual attributes - Nodes\nvisNetwork() looks for a field called “group” in the nodes object and colour the nodes according to the values of the group field.\nThe code chunk below rename Department field to group.\n\nGAStech_nodes &lt;- GAStech_nodes %&gt;%\n  rename(group = Department) \n\nWhen we rerun the code chunk below, visNetwork shades the nodes by assigning unique colour to each category in the group field.\n\n\nCode\nvisNetwork(GAStech_nodes,\n           GAStech_edges_aggregated) %&gt;%\n  visIgraphLayout(layout = \"layout_with_fr\") %&gt;%\n  visLegend() %&gt;%\n  visLayout(randomSeed = 123)\n\n\n\n\n\n\n\n\nWorking with visual attributes - Edges\nIn the code run below visEdges() is used to symbolise the edges.\n\nThe argument arrows is used to define where to place the arrow.\nThe smooth argument is used to plot the edges using a smooth curve.\n\n\n\nCode\nvisNetwork(GAStech_nodes,\n           GAStech_edges_aggregated) %&gt;%\n  visIgraphLayout(layout = \"layout_with_fr\") %&gt;%\n  visEdges(arrows = \"to\", \n           smooth = list(enabled = TRUE, \n                         type = \"curvedCW\")) %&gt;%\n  visLegend() %&gt;%\n  visLayout(randomSeed = 123)"
+  },
+  {
+    "objectID": "Hands-on_Ex/Hands-on_Ex09.html#interactivity",
+    "href": "Hands-on_Ex/Hands-on_Ex09.html#interactivity",
+    "title": "Hands-on Exercise 9: Modelling, Visualising and Analysing Network Data with R",
+    "section": "7.3 Interactivity",
+    "text": "7.3 Interactivity\nIn the code chunk below, visOptions() is used to incorporate interactivity features in the data visualisation.\n\nThe argument highlightNearest highlights nearest when clicking a node.\nThe argument nodesIdSelection adds an id node selection creating an HTML select element.\n\n\n\nCode\nvisNetwork(GAStech_nodes,\n           GAStech_edges_aggregated) %&gt;%\n  visIgraphLayout(layout = \"layout_with_fr\") %&gt;%\n  visOptions(highlightNearest = TRUE,\n             nodesIdSelection = TRUE) %&gt;%\n  visLegend() %&gt;%\n  visLayout(randomSeed = 123)"
   },
   {
     "objectID": "Hands-on_Ex/Hands-on_Ex07.html",
@@ -665,46 +735,88 @@
     "text": "4. Extreme Value Maps\n\n4.1 Percentile Map\n\nData preparation\nStep 1: Exclude records with NA by using the code chunk below.\n\nNGA_wp &lt;- NGA_wp %&gt;%\n  drop_na()\n\nStep 2: Creating customised classification and extracting values\n\npercent &lt;- c(0,.01,.1,.5,.9,.99,1)\nvar &lt;- NGA_wp[\"pct_functional\"] %&gt;%\n  st_set_geometry(NULL)\nquantile(var[,1], percent)\n\n       0%        1%       10%       50%       90%       99%      100% \n0.0000000 0.0000000 0.2169811 0.4791667 0.8611111 1.0000000 1.0000000 \n\n\n\n\nCreating the get.var function\nFirstly, we will write an R function as shown below to extract a variable (i.e. wp_nonfunctional) as a vector out of an sf data.frame.\n\narguments:\n\nvname: variable name (as character, in quotes)\ndf: name of sf data frame\n\nreturns:\n\nv: vector with values (without a column name)\n\n\n\nget.var &lt;- function(vname,df) {\n  v &lt;- df[vname] %&gt;% \n    st_set_geometry(NULL)\n  v &lt;- unname(v[,1])\n  return(v)\n}\n\n\n\nA percentile mapping function\nNext, we will write a percentile mapping function by using the code chunk below.\n\npercentmap &lt;- function(vnam, df, legtitle=NA, mtitle=\"Percentile Map\"){\n  percent &lt;- c(0,.01,.1,.5,.9,.99,1)\n  var &lt;- get.var(vnam, df)\n  bperc &lt;- quantile(var, percent)\n  tm_shape(df) +\n  tm_polygons() +\n  tm_shape(df) +\n     tm_fill(vnam,\n             title=legtitle,\n             breaks=bperc,\n             palette=\"Blues\",\n          labels=c(\"&lt; 1%\", \"1% - 10%\", \"10% - 50%\", \"50% - 90%\", \"90% - 99%\", \"&gt; 99%\"))  +\n  tm_borders() +\n  tm_layout(main.title = mtitle, \n            title.position = c(\"right\",\"bottom\"))\n}\n\nTo run the function, type the code chunk as shown below.\n\npercentmap(\"total_wp\", NGA_wp)\n\n\n\n\n\n\n\n\n\n\n\n4.2 Box map\n\n\nCode\nggplot(data = NGA_wp,\n       aes(x = \"\",\n           y = wp_nonfunctional)) +\n  geom_boxplot()\n\n\n\n\n\n\n\n\n\n\nCreating the boxbreaks function\nThe code chunk below is an R function that creating break points for a box map.\n\narguments:\n\nv: vector with observations\nmult: multiplier for IQR (default 1.5)\n\nreturns:\n\nbb: vector with 7 break points compute quartile and fences\n\n\n\n\nCode\nboxbreaks &lt;- function(v,mult=1.5) {\n  qv &lt;- unname(quantile(v))\n  iqr &lt;- qv[4] - qv[2]\n  upfence &lt;- qv[4] + mult * iqr\n  lofence &lt;- qv[2] - mult * iqr\n  # initialize break points vector\n  bb &lt;- vector(mode=\"numeric\",length=7)\n  # logic for lower and upper fences\n  if (lofence &lt; qv[1]) {  # no lower outliers\n    bb[1] &lt;- lofence\n    bb[2] &lt;- floor(qv[1])\n  } else {\n    bb[2] &lt;- lofence\n    bb[1] &lt;- qv[1]\n  }\n  if (upfence &gt; qv[5]) { # no upper outliers\n    bb[7] &lt;- upfence\n    bb[6] &lt;- ceiling(qv[5])\n  } else {\n    bb[6] &lt;- upfence\n    bb[7] &lt;- qv[5]\n  }\n  bb[3:5] &lt;- qv[2:4]\n  return(bb)\n}\n\n\n\n\nCreating the get.var function\nThe code chunk below is an R function to extract a variable as a vector out of an sf data frame.\n\narguments:\n\nvname: variable name (as character, in quotes)\ndf: name of sf data frame\n\nreturns:\n\nv: vector with values (without a column name)\n\n\n\nget.var &lt;- function(vname,df) {\n  v &lt;- df[vname] %&gt;% st_set_geometry(NULL)\n  v &lt;- unname(v[,1])\n  return(v)\n}\n\n\nvar &lt;- get.var(\"wp_nonfunctional\", NGA_wp) \nboxbreaks(var)\n\n[1] -56.5   0.0  14.0  34.0  61.0 131.5 278.0\n\n\n\n\nBoxmap function\nThe code chunk below is an R function to create a box map. - arguments: - vnam: variable name (as character, in quotes) - df: simple features polygon layer - legtitle: legend title - mtitle: map title - mult: multiplier for IQR - returns: - a tmap-element (plots a map)\n\n\nCode\nboxmap &lt;- function(vnam, df, \n                   legtitle=NA,\n                   mtitle=\"Box Map\",\n                   mult=1.5){\n  var &lt;- get.var(vnam,df)\n  bb &lt;- boxbreaks(var)\n  tm_shape(df) +\n    tm_polygons() +\n  tm_shape(df) +\n     tm_fill(vnam,title=legtitle,\n             breaks=bb,\n             palette=\"Blues\",\n          labels = c(\"lower outlier\", \n                     \"&lt; 25%\", \n                     \"25% - 50%\", \n                     \"50% - 75%\",\n                     \"&gt; 75%\", \n                     \"upper outlier\"))  +\n  tm_borders() +\n  tm_layout(main.title = mtitle, \n            title.position = c(\"left\",\n                               \"top\"))\n}\n\n\n\n\nCode\ntmap_mode(\"plot\")\nboxmap(\"wp_nonfunctional\", NGA_wp)"
   },
   {
-    "objectID": "In-class_Ex/In-class_Ex05.html",
-    "href": "In-class_Ex/In-class_Ex05.html",
-    "title": "In-class Exercise 5",
+    "objectID": "In-class_Ex/In-class_Ex04.html",
+    "href": "In-class_Ex/In-class_Ex04.html",
+    "title": "In-class Exercise 4",
     "section": "",
-    "text": "pacman::p_load(tidyverse, readxl, SmartEDA, easystats, gtsummary, ggstatsplot)\n\n\ncar_resale &lt;- read_xls(\"../data/ToyotaCorolla.xls\", \"data\")"
+    "text": "1. Getting Started\n\npacman::p_load(haven, SmartEDA, tidyverse, tidymodels, ggridges, ggthemes, colorspace, ggstatsplot, ggdist)\n\n\nexam_data &lt;- read_csv(\"../data/Exam_data.csv\")\n\n\n\n2. Plotting\n\nggplot(data = exam_data, aes(x = ENGLISH,y = CLASS)) +\n  geom_boxplot()\n\n\n\n\n\n\n\n\n\nggplot(exam_data, \n       aes(x = ENGLISH, \n           y = CLASS)) +\n  geom_density_ridges(\n    scale = 3,\n    rel_min_height = 0.01,\n    bandwidth = 3.4,\n    fill = lighten(\"#7097BB\", .3),\n    color = \"white\"\n  ) +\n  scale_x_continuous(\n    name = \"English grades\",\n    expand = c(0, 0)\n    ) +\n  scale_y_discrete(name = NULL, expand = expansion(add = c(0.2, 2.6))) +\n  theme_ridges()\n\n\n\n\n\n\n\n\n\nggplot(exam_data,\n       aes(x = RACE,\n           y = ENGLISH)) +\n  stat_halfeye(adjust = 0.5,\n               justification = -0.2,\n               .width = 0,\n               point_colout = NA) +\n  geom_boxplot(width = .20,\n               outlier.shape = NA) +\n  stat_dots(side = \"left\",\n            justification = 1.2,\n            binwidth = .5,\n            dotsize = 2)\n\n\n\n\n\n\n\n\n\nggbetweenstats(\n  data = exam_data,\n  x = GENDER,\n  y = MATHS,\n  type = \"np\", # non-parametric\n  messages = FALSE\n)"
   },
   {
-    "objectID": "In-class_Ex/In-class_Ex05.html#getting-started",
-    "href": "In-class_Ex/In-class_Ex05.html#getting-started",
-    "title": "In-class Exercise 5",
+    "objectID": "In-class_Ex/In-class_Ex07.html",
+    "href": "In-class_Ex/In-class_Ex07.html",
+    "title": "In-class Exercise 7",
     "section": "",
-    "text": "pacman::p_load(tidyverse, readxl, SmartEDA, easystats, gtsummary, ggstatsplot)\n\n\ncar_resale &lt;- read_xls(\"../data/ToyotaCorolla.xls\", \"data\")"
+    "text": "pacman::p_load(tidyverse, tsibble, feasts, fable, seasonal)"
   },
   {
-    "objectID": "In-class_Ex/In-class_Ex05.html#data-overview",
-    "href": "In-class_Ex/In-class_Ex05.html#data-overview",
-    "title": "In-class Exercise 5",
-    "section": "2. Data Overview",
-    "text": "2. Data Overview\n\ncar_resale %&gt;% ExpData(type = 1)\n\n                                          Descriptions     Value\n1                                   Sample size (nrow)      1436\n2                              No. of variables (ncol)        38\n3                    No. of numeric/interger variables        33\n4                              No. of factor variables         0\n5                                No. of text variables         5\n6                             No. of logical variables         0\n7                          No. of identifier variables         1\n8                                No. of date variables         0\n9             No. of zero variance variables (uniform)         1\n10               %. of variables having complete cases 100% (38)\n11   %. of variables having &gt;0% and &lt;50% missing cases    0% (0)\n12 %. of variables having &gt;=50% and &lt;90% missing cases    0% (0)\n13          %. of variables having &gt;=90% missing cases    0% (0)\n\n\n\ncar_resale %&gt;% ExpData(type = 2)\n\n   Index    Variable_Name Variable_Type Sample_n Missing_Count Per_of_Missing\n1      1               Id       numeric     1436             0              0\n2      2            Model     character     1436             0              0\n3      3            Price       numeric     1436             0              0\n4      4        Age_08_04       numeric     1436             0              0\n5      5        Mfg_Month       numeric     1436             0              0\n6      6         Mfg_Year       numeric     1436             0              0\n7      7               KM       numeric     1436             0              0\n8      8    Quarterly_Tax       numeric     1436             0              0\n9      9           Weight       numeric     1436             0              0\n10    10 Guarantee_Period       numeric     1436             0              0\n11    11           HP_Bin     character     1436             0              0\n12    12           CC_bin     character     1436             0              0\n13    13            Doors       numeric     1436             0              0\n14    14            Gears       numeric     1436             0              0\n15    15        Cylinders       numeric     1436             0              0\n16    16        Fuel_Type     character     1436             0              0\n17    17            Color     character     1436             0              0\n18    18        Met_Color       numeric     1436             0              0\n19    19        Automatic       numeric     1436             0              0\n20    20    Mfr_Guarantee       numeric     1436             0              0\n21    21  BOVAG_Guarantee       numeric     1436             0              0\n22    22              ABS       numeric     1436             0              0\n23    23         Airbag_1       numeric     1436             0              0\n24    24         Airbag_2       numeric     1436             0              0\n25    25            Airco       numeric     1436             0              0\n26    26  Automatic_airco       numeric     1436             0              0\n27    27    Boardcomputer       numeric     1436             0              0\n28    28        CD_Player       numeric     1436             0              0\n29    29     Central_Lock       numeric     1436             0              0\n30    30  Powered_Windows       numeric     1436             0              0\n31    31   Power_Steering       numeric     1436             0              0\n32    32            Radio       numeric     1436             0              0\n33    33        Mistlamps       numeric     1436             0              0\n34    34      Sport_Model       numeric     1436             0              0\n35    35 Backseat_Divider       numeric     1436             0              0\n36    36     Metallic_Rim       numeric     1436             0              0\n37    37   Radio_cassette       numeric     1436             0              0\n38    38          Tow_Bar       numeric     1436             0              0\n   No_of_distinct_values\n1                   1436\n2                    372\n3                    236\n4                     77\n5                     12\n6                      7\n7                   1263\n8                     13\n9                     59\n10                     9\n11                     3\n12                     3\n13                     4\n14                     4\n15                     1\n16                     3\n17                    10\n18                     2\n19                     2\n20                     2\n21                     2\n22                     2\n23                     2\n24                     2\n25                     2\n26                     2\n27                     2\n28                     2\n29                     2\n30                     2\n31                     2\n32                     2\n33                     2\n34                     2\n35                     2\n36                     2\n37                     2\n38                     2\n\n\n\ncols &lt;- c(\"Mfg_Month\", \"HP_Bin\", \"CC_bin\", \"Doors\", \"Gears\", \"Cylinders\",\n          \"Fuel_Type\", \"Color\", \"Met_Color\", \"Automatic\", \"Mfr_Guarantee\",\n          \"BOVAG_Guarantee\", \"ABS\", \"Airbag_1\", \"Airbag_2\", \"Airco\",\n          \"Automatic_airco\", \"Boardcomputer\", \"CD_Player\", \"Central_Lock\",\n          \"Powered_Windows\", \"Power_Steering\", \"Radio\", \"Mistlamps\", \"Sport_Model\",\n          \"Backseat_Divider\", \"Metallic_Rim\", \"Radio_cassette\", \"Tow_Bar\")\n\ncar_resale &lt;- read_xls(\"../data/ToyotaCorolla.xls\", \"data\") %&gt;%\n  mutate(Id = as.character(Id)) %&gt;%\n  mutate(across(all_of(cols), as.factor))\n\n\ncar_resale %&gt;% ExpNumStat(by = \"A\",\n                          gp = NULL,\n                          Qnt = seq(0,1,0.1),\n                          MesofShape = 2,\n                          Outlier = TRUE,\n                          round = 2,\n                          Nlim = 10)\n\n          Vname Group   TN nNeg nZero nPos NegInf PosInf NA_Value\n2     Age_08_04   All 1436    0     0 1436      0      0        0\n3            KM   All 1436    0     0 1436      0      0        0\n1         Price   All 1436    0     0 1436      0      0        0\n4 Quarterly_Tax   All 1436    0     0 1436      0      0        0\n5        Weight   All 1436    0     0 1436      0      0        0\n  Per_of_Missing      sum  min    max     mean  median       SD   CV      IQR\n2              0    80340    1     80    55.95    61.0    18.60 0.33    26.00\n3              0 98413761    1 243000 68533.26 63389.5 37506.45 0.55 44020.75\n1              0 15409464 4350  32500 10730.82  9900.0  3626.96 0.34  3500.00\n4              0   125108   19    283    87.12    85.0    41.13 0.47    16.00\n5              0  1540052 1000   1615  1072.46  1070.0    52.64 0.05    45.00\n  Skewness Kurtosis   0%     10%   20%   30%   40%     50%   60%     70%   80%\n2    -0.83    -0.08    1    27.0    40    49    55    61.0    65    68.0    73\n3     1.01     1.68    1 26241.5 37320 47355 56349 63389.5 72090 81094.5 94606\n1     1.70     3.72 4350  7450.0  7950  8750  8950  9900.0 10500 11250.0 12500\n4     1.99     4.28   19    69.0    69    69    69    85.0    85    85.0    85\n5     3.11    19.29 1000  1020.0  1035  1050  1050  1070.0  1075  1080.0  1105\n       90%   100%    LB.25%   UB.75% nOutliers\n2     77.0     80      5.00    109.0         7\n3 117087.5 243000 -23031.12 153051.9        49\n1  15950.0  32500   3200.00  17200.0       110\n4    185.0    283     45.00    109.0       224\n5   1130.0   1615    972.50   1152.5        66\n\n\n\ncar_resale %&gt;% ExpNumViz(target = NULL,\n                         nlim = 10,\n                         Page = c(2,2))\n\n$`0`\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\ncar_resale %&gt;% ExpNumViz(target = \"Price\",\n                         nlim = 10,\n                         Page = c(2,2))\n\n$`0`"
+    "objectID": "In-class_Ex/In-class_Ex07.html#plotting-single-time-series",
+    "href": "In-class_Ex/In-class_Ex07.html#plotting-single-time-series",
+    "title": "In-class Exercise 7",
+    "section": "5.1 Plotting single time-series",
+    "text": "5.1 Plotting single time-series\n\nts_longer %&gt;%\n  filter(Country == \"Vietnam\") %&gt;%\n  ggplot(aes(x = `Month.Year`, \n             y = Arrivals))+\n  geom_line(size = 0.5)"
   },
   {
-    "objectID": "In-class_Ex/In-class_Ex05.html#bar-plots-for-all-categorical-variables",
-    "href": "In-class_Ex/In-class_Ex05.html#bar-plots-for-all-categorical-variables",
-    "title": "In-class Exercise 5",
-    "section": "3. Bar plots for all categorical variables",
-    "text": "3. Bar plots for all categorical variables\n\ncar_resale%&gt;% ExpCatViz(target = NULL,\n                        col = \"Sky blue\",\n                        clim = 10,\n                        margin = 2,\n                        Page = c(4,4),\n                        sample = 16)\n\n$`0`"
+    "objectID": "In-class_Ex/In-class_Ex07.html#plotting-multiple-time-series",
+    "href": "In-class_Ex/In-class_Ex07.html#plotting-multiple-time-series",
+    "title": "In-class Exercise 7",
+    "section": "5.2 Plotting multiple time-series",
+    "text": "5.2 Plotting multiple time-series\n\nggplot(data = ts_longer, \n       aes(x = `Month.Year`, \n           y = Arrivals))+\n  geom_line(size = 0.5) +\n  facet_wrap(~ Country,\n             ncol = 3,\n             scales = \"free_y\") +\n  theme_bw()"
   },
   {
-    "objectID": "In-class_Ex/In-class_Ex05.html#regression-model",
-    "href": "In-class_Ex/In-class_Ex05.html#regression-model",
-    "title": "In-class Exercise 5",
-    "section": "4. Regression Model",
-    "text": "4. Regression Model\n\nattach(car_resale)\n\n\nmodel &lt;- lm(Price ~ Age_08_04 + Mfg_Year + KM + Weight + Guarantee_Period,\n            data = car_resale)\n\nmodel\n\n\nCall:\nlm(formula = Price ~ Age_08_04 + Mfg_Year + KM + Weight + Guarantee_Period, \n    data = car_resale)\n\nCoefficients:\n     (Intercept)         Age_08_04          Mfg_Year                KM  \n      -2.637e+06        -1.409e+01         1.315e+03        -2.323e-02  \n          Weight  Guarantee_Period  \n       1.903e+01         2.770e+01  \n\n\n\ncheck_collinearity(model)\n\n# Check for Multicollinearity\n\nLow Correlation\n\n             Term  VIF     VIF 95% CI Increased SE Tolerance Tolerance 95% CI\n               KM 1.46 [ 1.37,  1.57]         1.21      0.68     [0.64, 0.73]\n           Weight 1.41 [ 1.32,  1.51]         1.19      0.71     [0.66, 0.76]\n Guarantee_Period 1.04 [ 1.01,  1.17]         1.02      0.97     [0.86, 0.99]\n\nHigh Correlation\n\n      Term   VIF     VIF 95% CI Increased SE Tolerance Tolerance 95% CI\n Age_08_04 31.07 [28.08, 34.38]         5.57      0.03     [0.03, 0.04]\n  Mfg_Year 31.16 [28.16, 34.48]         5.58      0.03     [0.03, 0.04]\n\n\n\ncheck_c &lt;- check_collinearity(model)\nplot(check_c)\n\n\n\n\n\n\n\n\n\nmodel1 &lt;- lm(Price ~ Age_08_04 + KM + Weight + Guarantee_Period, \n             data = car_resale)\n\n\ncheck_model(model1)\n\n\n\n\n\n\n\n\n\ntbl_regression(model1, intercept = TRUE) %&gt;%\n  add_glance_source_note(label = list(sigma ~ \"U03C3\"),\n                         include = c(r.squared, adj.r.squared, AIC, statistic,\n                                     p.value, sigma))\n\n\n\n\n  \n    \n      Characteristic\n      Beta\n      95% CI1\n      p-value\n    \n  \n  \n    (Intercept)\n-2,186\n-4,093, -278\n0.025\n    Age_08_04\n-119\n-125, -114\n&lt;0.001\n    KM\n-0.02\n-0.03, -0.02\n&lt;0.001\n    Weight\n20\n18, 21\n&lt;0.001\n    Guarantee_Period\n27\n2.1, 52\n0.034\n  \n  \n    \n      R² = 0.849; Adjusted R² = 0.848; AIC = 24,915; Statistic = 2,005; p-value = &lt;0.001; U03C3 = 1,413\n    \n  \n  \n    \n      1 CI = Confidence Interval\n    \n  \n\n\n\n\n\np_model &lt;- parameters(model1)\n\n\nplot(parameters(model1))\n\n\n\n\n\n\n\n\n\nggcoefstats(model1, output = \"plot\")"
+    "objectID": "In-class_Ex/In-class_Ex07.html#visualizing-seasonality-with-cycle-plot",
+    "href": "In-class_Ex/In-class_Ex07.html#visualizing-seasonality-with-cycle-plot",
+    "title": "In-class Exercise 7",
+    "section": "5.3 Visualizing seasonality with Cycle Plot",
+    "text": "5.3 Visualizing seasonality with Cycle Plot\n\ntsibble_longer &lt;- ts_tsibble %&gt;%\n  pivot_longer(cols = c(2:34),\n               names_to = \"Country\",\n               values_to = \"Arrivals\")\n\n\ntsibble_longer %&gt;%\n  filter(Country == \"Vietnam\" |\n         Country == \"Italy\") %&gt;% \n  gg_subseries(Arrivals)"
   },
   {
-    "objectID": "In-class_Ex/In-class_Ex08.html",
-    "href": "In-class_Ex/In-class_Ex08.html",
-    "title": "In-class Exercise 8",
-    "section": "",
-    "text": "pacman::p_load(sf, tmap, tidyverse)\n\n\nmpsz &lt;- st_read(dsn = \"../data/geospatial\", \n                layer = \"MP14_SUBZONE_WEB_PL\")\n\nReading layer `MP14_SUBZONE_WEB_PL' from data source \n  `C:\\Users\\Zi Qi\\Documents\\SMU\\Visual Analytics\\zqwxxg\\ISSS608-VAA\\data\\geospatial' \n  using driver `ESRI Shapefile'\nSimple feature collection with 323 features and 15 fields\nGeometry type: MULTIPOLYGON\nDimension:     XY\nBounding box:  xmin: 2667.538 ymin: 15748.72 xmax: 56396.44 ymax: 50256.33\nProjected CRS: SVY21\n\n\n\npopdata &lt;- read_csv(\"../data/respopagesextod2011to2020.csv\")"
+    "objectID": "In-class_Ex/In-class_Ex07.html#single-time-series-decomposition",
+    "href": "In-class_Ex/In-class_Ex07.html#single-time-series-decomposition",
+    "title": "In-class Exercise 7",
+    "section": "6.1 Single time series decomposition",
+    "text": "6.1 Single time series decomposition\n\nACFPACF\n\n\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\") %&gt;%\n  ACF(Arrivals) %&gt;% \n  autoplot()\n\n\n\n\n\n\n\n\n\n\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\") %&gt;%\n  PACF(Arrivals) %&gt;% \n  autoplot()"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#multiple-time-series-decompoisition",
+    "href": "In-class_Ex/In-class_Ex07.html#multiple-time-series-decompoisition",
+    "title": "In-class Exercise 7",
+    "section": "6.2 Multiple time series decompoisition",
+    "text": "6.2 Multiple time series decompoisition\n\nACFPACF\n\n\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\" |\n         `Country` == \"Italy\" |\n         `Country` == \"United Kingdom\" |\n         `Country` == \"China\") %&gt;%\n  ACF(Arrivals) %&gt;%\n  autoplot()\n\n\n\n\n\n\n\n\n\n\n\ntsibble_longer %&gt;%\n  filter(`Country` == \"Vietnam\" |\n         `Country` == \"Italy\" |\n         `Country` == \"United Kingdom\" |\n         `Country` == \"China\") %&gt;%\n  PACF(Arrivals) %&gt;%\n  autoplot()"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#time-series-data-sampling",
+    "href": "In-class_Ex/In-class_Ex07.html#time-series-data-sampling",
+    "title": "In-class Exercise 7",
+    "section": "8.1 Time Series Data Sampling",
+    "text": "8.1 Time Series Data Sampling\n\nvietnam_ts &lt;- tsibble_longer %&gt;%\n  filter(Country == \"Vietnam\") %&gt;% \n  mutate(Type = if_else(\n    `Month.Year` &gt;= \"2019-01-01\", \n    \"Hold-out\", \"Training\"))\n\n\nvietnam_train &lt;- vietnam_ts %&gt;%\n  filter(`Month.Year` &lt; \"2019-01-01\")"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#exploratory-data-analysis-eda-time-series-data",
+    "href": "In-class_Ex/In-class_Ex07.html#exploratory-data-analysis-eda-time-series-data",
+    "title": "In-class Exercise 7",
+    "section": "8.2 Exploratory Data Analysis (EDA): Time Series Data",
+    "text": "8.2 Exploratory Data Analysis (EDA): Time Series Data\n\nvietnam_train %&gt;%\n  model(stl = STL(Arrivals)) %&gt;%\n  components() %&gt;%\n  autoplot()"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#fitting-forecasting-models",
+    "href": "In-class_Ex/In-class_Ex07.html#fitting-forecasting-models",
+    "title": "In-class Exercise 7",
+    "section": "8.3 Fitting forecasting models",
+    "text": "8.3 Fitting forecasting models\n\nFitting a simple exponential smoothing (SES)\n\nfit_ses &lt;- vietnam_train %&gt;%\n  model(ETS(Arrivals ~ error(\"A\") \n            + trend(\"N\") \n            + season(\"N\")))\nfit_ses\n\n# A mable: 1 x 2\n# Key:     Country [1]\n  Country `ETS(Arrivals ~ error(\"A\") + trend(\"N\") + season(\"N\"))`\n  &lt;chr&gt;                                                   &lt;model&gt;\n1 Vietnam                                            &lt;ETS(A,N,N)&gt;\n\n\n\n\nExamine Model Assumptions\n\ngg_tsresiduals(fit_ses)"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#fitting-multiple-ets-models",
+    "href": "In-class_Ex/In-class_Ex07.html#fitting-multiple-ets-models",
+    "title": "In-class Exercise 7",
+    "section": "8.4 Fitting multiple ETS Models",
+    "text": "8.4 Fitting multiple ETS Models\n\nfit_ETS &lt;- vietnam_train %&gt;%\n  model(`SES` = ETS(Arrivals ~ error(\"A\") + \n                      trend(\"N\") + \n                      season(\"N\")),\n        `Holt`= ETS(Arrivals ~ error(\"A\") +\n                      trend(\"A\") +\n                      season(\"N\")),\n        `damped Holt` = \n          ETS(Arrivals ~ error(\"A\") +\n                trend(\"Ad\") + \n                season(\"N\")),\n        `WH_A` = ETS(\n          Arrivals ~ error(\"A\") + \n            trend(\"A\") + \n            season(\"A\")),\n        `WH_M` = ETS(Arrivals ~ error(\"M\") \n                         + trend(\"A\") \n                         + season(\"M\"))\n  )"
+  },
+  {
+    "objectID": "In-class_Ex/In-class_Ex07.html#forecasting-future-values",
+    "href": "In-class_Ex/In-class_Ex07.html#forecasting-future-values",
+    "title": "In-class Exercise 7",
+    "section": "8.5 Forecasting future values",
+    "text": "8.5 Forecasting future values\n\nfit_ETS %&gt;%\n  forecast(h = \"12 months\") %&gt;%\n  autoplot(vietnam_ts, \n           level = NULL)"
   },
   {
     "objectID": "Take-home_Ex/Take-home_Ex01/Take-home_Ex01.html",
