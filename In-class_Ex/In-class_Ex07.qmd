@@ -280,6 +280,3 @@ ASEAN_fc <- ASEAN_fit %>%
 ASEAN_fc %>%
   autoplot(ASEAN)
 ```
-
-
-

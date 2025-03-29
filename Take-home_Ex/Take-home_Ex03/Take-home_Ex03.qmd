@@ -1,0 +1,188 @@
+---
+title: "Take-home Exercise 3: Spatiotemporal Rainfall Analysis"
+author: "Wong Zi Qi"
+date: "March 24, 2025"
+date-modified: "March 24, 2025"
+execute: 
+  echo: true
+  eval: true
+  warning: false
+  freeze: true
+---
+
+# Overview
+
+# 1. Getting Started
+
+```{r}
+pacman::p_load(tidyverse, lubridate, SmartEDA, ggplot2, tsibble, feasts, seasonal,
+               imputeTS, fable, changepoint)
+```
+
+```{r}
+weather <- read.csv("data/weather_data.csv")
+active_stations <- read.csv("data/active_rainfall_stations.csv")
+```
+
+# 2. Data Pre-processing
+
+```{r}
+# remove () for consistent naming
+weather$Station <- gsub("[()]", "", trimws(as.character(weather$Station)))
+active_stations$Station.Name <- gsub("[()]", "", trimws(as.character(active_stations$Station.Name)))
+```
+
+Now that both active stations and weather data have consistent naming, with 27 distinct values, we filter stations that are active.
+
+```{r}
+weather_active <- weather %>% 
+  filter(Station %in% active_stations$Station.Name)
+```
+
+```{r}
+weather_active <- weather_active %>%
+  select(Station, Year, Month, Day, Daily.Rainfall.Total..mm.) %>%
+  filter(!is.na(Daily.Rainfall.Total..mm.)) %>%
+  merge(active_stations, by.x = "Station", by.y = "Station.Name") %>%
+  select(Station, Year, Month, Day, Daily.Rainfall.Total..mm., Latitude, Longitude) %>%
+  mutate(Date = make_date(Year, Month, Day), Station = as.factor(Station)) %>%
+  arrange(Station, Date)
+```
+
+# 3. EDA
+
+```{r}
+weather_active %>% ExpData(type = 1)
+```
+
+```{r}
+weather_active %>% ExpData(type = 2)
+```
+
+```{r}
+# explore how rainfall varies across stations
+ExpNumStat(weather_active, 
+           by = "GA", 
+           gp = "Station", 
+           round = 2)
+```
+
+# 4. Temporal Rainfall Analysis
+
+```{r}
+# Create monthly time series object
+monthly_station_rain <- weather_active %>%
+  mutate(MonthYear = floor_date(Date, "month")) %>%
+  group_by(Station, MonthYear) %>%
+  summarise(MonthlyRain = sum(Daily.Rainfall.Total..mm.))
+```
+
+```{r}
+monthly_station_rain <- monthly_station_rain %>%
+  mutate(MonthYear = yearmonth(MonthYear)) %>%
+  as_tsibble(index = MonthYear, key = Station)
+```
+
+```{r}
+monthly_station_rain
+```
+
+```{r}
+seasonal_rain <- monthly_station_rain %>%
+  fill_gaps() %>%
+  group_by(Station) %>%
+  mutate(MonthlyRain = na_interpolation(MonthlyRain)) %>%
+  ungroup()
+```
+
+```{r}
+ts_decomposition <- function(station_name) {
+  seasonal_rain %>%
+    filter(Station == station_name) %>%
+    gg_tsdisplay(MonthlyRain) +
+    labs(title = paste("Monthly Rainfall in", station_name))
+}
+```
+
+```{r}
+ts_decomposition("Bukit Panjang")
+```
+
+```{r}
+stl_decomposition <- function(station_name) {
+  seasonal_rain %>%
+    filter(Station == station_name) %>%
+    model(stl = STL(MonthlyRain)) %>%
+    components() %>%
+    autoplot() +
+    labs(title = paste("STL Decomposition for", station_name))
+}
+```
+
+```{r}
+stl_decomposition("Bukit Panjang")
+```
+
+```{r}
+stl_residuals <- function(station_name) {
+  model_fit <- seasonal_rain %>%
+    filter(Station == station_name) %>%
+    model(ETS(MonthlyRain))
+  
+  gg_tsresiduals(model_fit) +
+    labs(title = paste("Residuals Components for", station_name))
+}
+```
+
+```{r}
+stl_residuals("Bukit Panjang")
+```
+
+```{r}
+detect_changepoints <- function(station_name) {
+  station_data <- seasonal_rain %>%
+    filter(Station == station_name) %>%
+    pull(MonthlyRain)
+
+  cpt_result <- cpt.mean(station_data, method = "PELT")
+  
+  plot(
+    cpt_result,
+    main = paste("Change Points in Monthly Rainfall (Mean) for", station_name),
+    xlab = "Month Index",
+    ylab = "Rainfall (mm)"
+  )
+}
+```
+
+```{r}
+changepoint_res <- detect_changepoints("Bukit Panjang")
+```
+
+```{r}
+plot_changepoints <- function(station_name) {
+  station_data <- seasonal_rain %>%
+    filter(Station == station_name)
+  
+  rain <- station_data$MonthlyRain
+  dates <- station_data$MonthYear
+  
+  cpt_result <- cpt.mean(rain, method = "PELT")
+  change_indices <- cpts(cpt_result)
+  change_dates <- as.Date(dates[change_indices])
+  
+  ggplot(station_data, aes(x = as.Date(MonthYear), y = MonthlyRain)) +
+    geom_line(color = "steelblue") +
+    geom_vline(xintercept = change_dates, linetype = "dashed", color = "red") +
+    labs(
+      title = paste("Monthly Rainfall with Change Points for", station_name),
+      x = "Year",
+      y = "Rainfall (mm)"
+    ) +
+    theme_minimal()
+}
+```
+
+```{r}
+plot_changepoints("Bukit Panjang")
+```
