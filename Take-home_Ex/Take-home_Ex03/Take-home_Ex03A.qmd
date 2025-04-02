@@ -152,18 +152,6 @@ ts_decomposition("Bukit Panjang")
 
     Monthly patterns also highlight consistently higher rainfall in November - December, aligning with the Northeast monsoon season. Although seasonal trends are generally consistent, there is noticeable inter-annual variability; for instance, 2021 recorded an exceptionally high rainfall in August, while years like 2019 experienced more moderate and stable patterns.
 
-```{r}
-ts_decomposition("Kranji Reservoir")
-```
-
-```{r}
-ts_decomposition("Pasir Ris Central")
-```
-
-```{r}
-ts_decomposition("Marine Parade")
-```
-
 ## 4.3 STL Decomposition
 
 The `stl_decomposition` function is developed to perform seasonal-trend decomposition of monthly rainfall data using the STL (Seasonal-Trend decomposition using Loess) method, applied here to the Bukit Panjang weather station.
